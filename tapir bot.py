@@ -29,4 +29,4 @@ async def on_message(message):
         await client.send_message(message.channel, tapirs[random.randrange(images)])
         
 
-client.run('MTczNjQ4MzM0NDc5Njg3Njgx.Cf3v3w.4-3xsLdMHqMLF-_OijjuuagIWKc')
+client.run('token_here')
