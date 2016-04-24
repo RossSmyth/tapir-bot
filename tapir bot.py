@@ -12,10 +12,13 @@ tapirs = ["http://i.imgur.com/tgPoQ9S.jpg", "http://i.imgur.com/n2BjyFA.png", "h
 
 images = len(tapirs) #so I don't have to manually count it, and able to add pictures easily
 
+current_game = "\"!tapir-help\" for help" #string for the game being played. Don't forget escape characters!
+
 client = discord.Client() #easier coding!
 
 @client.event #haha I don't know what this means
 async def on_ready(): #same here, maybe when bot is ready it does the thing
+    await client.change_status(game=discord.Game(name=current_game)) #puts a help command in the game played
     print('Logged in as') #I know this one
     print(client.user.name) #prints the bots user name
     print("\nServers:") #puts "Servers" and a new line
@@ -25,9 +28,12 @@ async def on_ready(): #same here, maybe when bot is ready it does the thing
 
 @client.event #still don't know what this means
 async def on_message(message): #probbly means when someone sends a message
-    if message.content.startswith('!tapir'): #if a message starts with "!tapir" 
+    if message.content.startswith('!tapir') and not message.content.startswith('!tapir-help') : #if a message starts with "!tapir" 
         print("Something Happened!") #prints "Something Happened" on Python console so I know something happened
         await client.send_message(message.channel, tapirs[random.randrange(images)]) #choses a random tapir picture
-        
+    elif message.content.startswith('!tapir-help'): #help command
+        print("Help is on the way!") #prints to let know someone requested help
+        await client.send_message(message.channel, "Hello! I am a bot made by @treefrðŸ‘€g#4429 . Type `!tapir` to get a random tapir image!") #prints help message. Formatting names is hard. pls fix
+    
 
-client.run('token_here') #bot token here
+client.run('bot_token') #bot token here
