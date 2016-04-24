@@ -33,7 +33,7 @@ async def on_message(message): #probbly means when someone sends a message
         await client.send_message(message.channel, tapirs[random.randrange(images)]) #choses a random tapir picture
     elif message.content.startswith('!tapir-help'): #help command
         print("Help is on the way!") #prints to let know someone requested help
-        await client.send_message(message.channel, "Hello! I am a bot made by @treefr👀g . Type `!tapir` to get a random tapir image!") #prints help message. Formatting names is hard. pls fix
+        await client.send_message(message.channel, "Hello! I am a bot made by <@149281074437029890> . Type `!tapir` to get a random tapir image!") #prints help message. Formatting names is hard. pls fix
     
 
 client.run('bot_token') #bot token here
