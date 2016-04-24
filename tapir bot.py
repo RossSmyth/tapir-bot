@@ -28,12 +28,16 @@ async def on_ready(): #same here, maybe when bot is ready it does the thing
 
 @client.event #still don't know what this means
 async def on_message(message): #probbly means when someone sends a message
-    if message.content.startswith('!tapir') and not message.content.startswith('!tapir-help') : #if a message starts with "!tapir" 
+    if message.content.lower() == '!tapir' and not message.content.lower() == '!tapir-help' : #if a message starts with "!tapir" 
         print("Something Happened!") #prints "Something Happened" on Python console so I know something happened
         await client.send_message(message.channel, tapirs[random.randrange(images)]) #choses a random tapir picture
-    elif message.content.startswith('!tapir-help'): #help command
+    elif message.content.lower() == '!tapir-help': #help command if !tapir-help is said
         print("Help is on the way!") #prints to let know someone requested help
-        await client.send_message(message.channel, "Hello! I am a bot made by <@149281074437029890> . Type `!tapir` to get a random tapir image!") #prints help message. Formatting names is hard. pls fix
+        await client.send_message(message.channel, "Hello! I am a bot made by <@149281074437029890> . Type `!tapir` to get a random tapir image!") #prints help message.
+    elif message.content.lower() == '!carrack': #carrack is BAE
+        print("Carrack pls") #on colsole lets me know someting happened
+        await client.send_message(message.channel, "Carrack pls http://i.imgur.com/BA3F1OI.png") #says carrack pls with carrack pic
+    
     
 
 client.run('bot_token') #bot token here
