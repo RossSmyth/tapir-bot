@@ -12,7 +12,7 @@ tapirs = ["http://i.imgur.com/tgPoQ9S.jpg", "http://i.imgur.com/n2BjyFA.png", "h
 
 images = len(tapirs) #so I don't have to manually count it, and able to add pictures easily
 
-current_game = "\"!tapir-help\" for help" #string for the game being played. Don't forget escape characters!
+current_game = "\"|help\" for help" #string for the game being played. Don't forget escape characters!
 
 client = discord.Client() #easier coding!
 
@@ -26,21 +26,35 @@ async def on_ready(): #same here, maybe when bot is ready it does the thing
         print(s.name)
     print('------') #prints '------' at end of startup squence
 
+#command dictionary
+commands = {
+    '|help' : 'Hello! I am a bot made by <@149281074437029890> . Type `|tapir` to get a random tapir image!',
+    '|carrack' : 'Carrack pls http://i.imgur.com/BA3F1OI.png',
+    '|jumby' : 'http://i.imgur.com/IGsmL62.png',
+    '|jumbify': 'http://i.imgur.com/IGsmL62.png'
+}
+
 @client.event #still don't know what this means
-async def on_message(message): #probbly means when someone sends a message
-    if message.content.lower() == '!tapir' and not message.content.lower() == '!tapir-help' : #if a message starts with "!tapir" 
-        print("Something Happened!") #prints "Something Happened" on Python console so I know something happened
-        await client.send_message(message.channel, tapirs[random.randrange(images)]) #choses a random tapir picture
-    elif message.content.lower() == '!tapir-help': #help command if !tapir-help is said
-        print("Help is on the way!") #prints to let know someone requested help
-        await client.send_message(message.channel, "Hello! I am a bot made by <@149281074437029890> . Type `!tapir` to get a random tapir image!") #prints help message.
-    elif message.content.lower() == '!carrack': #carrack is BAE
-        print("Carrack pls") #on colsole lets me know something happened
-        await client.send_message(message.channel, "Carrack pls http://i.imgur.com/BA3F1OI.png") #says carrack pls with carrack pic
-    elif message.content.lower() == '!jumby' or message.content.lower() == '!jumbify': #adds jumby
-        print("jumby") #on console shows jumby got jumbyed
-        await client.send_message(message.channel, "http://i.imgur.com/IGsmL62.png") #does the jumby
+async def on_message(message): #probably means when someone sends a message
+    channel = message.channel #defines the channel the messages is sent to as a variable
+    raw_message = message #the raw message is saved
+    message = message.content.lower() #the message is put into a lower case format
+    if len(message) >= 1: #must have atleast one character in the message
+        message = message.split(' ') #message is made into a list split at every ' '
+        if message[0].startswith('|'): #prefix is defined as '|'
+            if message[0] == '|tapir': #the tapir command since it's speical and can't be string sadly
+                print(message[0], end=' ') #prints command on console
+                print(raw_message.author) #print who sent the command
+                await client.send_message(raw_message.channel, tapirs[random.randrange(images)]) #send random link from image list
+            elif message[0] in commands: #if not tapir checks if command in the the command dictionary
+                print(message[0], end=' ') #prints command on console
+                print(raw_message.author) #prints message author
+                await client.send_message(raw_message.channel, commands[message[0]]) #says the commands text
+            else: #if not either of those
+                print(raw_message.content, end=' ') #prints the message
+                print(raw_message.author) #prints who sent the message
+                await client.send_message(raw_message.channel, "Command {0} does not exist! Type |help for help.".format(message[0])) #error string sent
     
     
 
-client.run('bot_token') #bot token here
+client.run('MTczNjQ4MzM0NDc5Njg3Njgx.Cf6KWA.HkEwR1EnFKkVJO_zyRSkqhhqeu0') #bot token here
