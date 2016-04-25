@@ -50,11 +50,8 @@ async def on_message(message): #probably means when someone sends a message
                 print(message[0], end=' ') #prints command on console
                 print(raw_message.author) #prints message author
                 await client.send_message(raw_message.channel, commands[message[0]]) #says the commands text
-            else: #if not either of those
-                print(raw_message.content, end=' ') #prints the message
-                print(raw_message.author) #prints who sent the message
-                await client.send_message(raw_message.channel, "Command {0} does not exist! Type |help for help.".format(message[0])) #error string sent
+            
     
     
 
-client.run('MTczNjQ4MzM0NDc5Njg3Njgx.Cf6KWA.HkEwR1EnFKkVJO_zyRSkqhhqeu0') #bot token here
+client.run('bot_token') #bot token here
