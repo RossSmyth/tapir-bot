@@ -38,6 +38,7 @@ async def on_message(message): #probbly means when someone sends a message
         print("Carrack pls") #on colsole lets me know something happened
         await client.send_message(message.channel, "Carrack pls http://i.imgur.com/BA3F1OI.png") #says carrack pls with carrack pic
     elif message.content.lower() == '!jumby' or message.content.lower() == '!jumbify': #adds jumby
+        print("jumby") #on console shows jumby got jumbyed
         await client.send_message(message.channel, "http://i.imgur.com/IGsmL62.png") #does the jumby
     
     
