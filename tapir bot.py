@@ -12,7 +12,7 @@ tapirs = ["http://i.imgur.com/tgPoQ9S.jpg", "http://i.imgur.com/n2BjyFA.png", "h
 
 images = len(tapirs) #so I don't have to manually count it, and able to add pictures easily
 
-current_game = "\"!help-tapir\" for help" #string for the game being played. Don't forget escape characters!
+current_game = "\"!?\" for help" #string for the game being played. Don't forget escape characters!
 
 client = discord.Client() #easier coding!
 
@@ -28,10 +28,11 @@ async def on_ready(): #same here, maybe when bot is ready it does the thing
 
 #command dictionary
 commands = {
-    '!help-tapir' : 'Hello! I am a bot made by <@149281074437029890> . Type `|tapir` to get a random tapir image!',
+    '!?' : 'Hello! I am a bot made by <@149281074437029890> . Type `!tapir` to get a random tapir image! Type `!tcommands` for more commands',
     '!carrack' : 'Carrack pls http://i.imgur.com/BA3F1OI.png',
     '!jumby' : 'http://i.imgur.com/IGsmL62.png',
-    '!jumbify': 'http://i.imgur.com/IGsmL62.png'
+    '!jumbify': 'http://i.imgur.com/IGsmL62.png',
+    '!tcommands' : '`!carrack` says \'Carrack pls\' and puts a Carrack picture. \n`!jumby` or `!jumbify` puts a jumby picture. \n`!tapir` puts a random tapir picture.'
 }
 
 @client.event #still don't know what this means
