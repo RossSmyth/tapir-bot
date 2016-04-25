@@ -12,7 +12,7 @@ tapirs = ["http://i.imgur.com/tgPoQ9S.jpg", "http://i.imgur.com/n2BjyFA.png", "h
 
 images = len(tapirs) #so I don't have to manually count it, and able to add pictures easily
 
-current_game = "\"|help\" for help" #string for the game being played. Don't forget escape characters!
+current_game = "\"!help-tapir\" for help" #string for the game being played. Don't forget escape characters!
 
 client = discord.Client() #easier coding!
 
@@ -28,10 +28,10 @@ async def on_ready(): #same here, maybe when bot is ready it does the thing
 
 #command dictionary
 commands = {
-    '|help' : 'Hello! I am a bot made by <@149281074437029890> . Type `|tapir` to get a random tapir image!',
-    '|carrack' : 'Carrack pls http://i.imgur.com/BA3F1OI.png',
-    '|jumby' : 'http://i.imgur.com/IGsmL62.png',
-    '|jumbify': 'http://i.imgur.com/IGsmL62.png'
+    '!help-tapir' : 'Hello! I am a bot made by <@149281074437029890> . Type `|tapir` to get a random tapir image!',
+    '!carrack' : 'Carrack pls http://i.imgur.com/BA3F1OI.png',
+    '!jumby' : 'http://i.imgur.com/IGsmL62.png',
+    '!jumbify': 'http://i.imgur.com/IGsmL62.png'
 }
 
 @client.event #still don't know what this means
@@ -41,8 +41,8 @@ async def on_message(message): #probably means when someone sends a message
     message = message.content.lower() #the message is put into a lower case format
     if len(message) >= 1: #must have atleast one character in the message
         message = message.split(' ') #message is made into a list split at every ' '
-        if message[0].startswith('|'): #prefix is defined as '|'
-            if message[0] == '|tapir': #the tapir command since it's speical and can't be string sadly
+        if message[0].startswith('!'): #prefix is defined as '|'
+            if message[0] == '!tapir': #the tapir command since it's speical and can't be string sadly
                 print(message[0], end=' ') #prints command on console
                 print(raw_message.author) #print who sent the command
                 await client.send_message(raw_message.channel, tapirs[random.randrange(images)]) #send random link from image list
