@@ -28,11 +28,10 @@ async def on_ready(): #same here, maybe when bot is ready it does the thing
 
 #command dictionary
 commands = {
-    '!?' : 'Hello! I am a bot made by <@149281074437029890> . Type `!tapir` to get a random tapir image! Type `!tcommands` for more commands',
+    '!?' : 'Hello! I am a bot made by <@149281074437029890> . \nType `!tapir` to get a random tapir image! \n`!carrack` says \'Carrack pls\' and puts a Carrack picture. \n`!jumby` or `!jumbify` puts a jumby picture.',
     '!carrack' : 'Carrack pls http://i.imgur.com/BA3F1OI.png',
     '!jumby' : 'http://i.imgur.com/IGsmL62.png',
-    '!jumbify': 'http://i.imgur.com/IGsmL62.png',
-    '!tcommands' : '`!carrack` says \'Carrack pls\' and puts a Carrack picture. \n`!jumby` or `!jumbify` puts a jumby picture. \n`!tapir` puts a random tapir picture.'
+    '!jumbify': 'http://i.imgur.com/IGsmL62.png'
 }
 
 @client.event #still don't know what this means
