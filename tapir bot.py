@@ -35,6 +35,7 @@ commands = {
     '!azwe': '<@118907180761088006> https://giphy.com/gifs/IEceC9q1MgWrK',
     '!ben' : 'http://i.imgur.com/OLKOQ6H.gif',
     '!2.4' : 'It\'s not just a meme! http://i.imgur.com/umBUjqW.gif',
+    '!tapir' : '{}'
 }
 
 @client.event #still don't know what this means
@@ -45,18 +46,12 @@ async def on_message(message): #probably means when someone sends a message
     if len(message) >= 1: #must have atleast one character in the message
         message = message.split(' ') #message is made into a list split at every ' '
         if message[0].startswith('!'): #prefix is defined as '!'
-            if message[0] == '!tapir' or message[0] == '!taper': #the tapir command since it's special and can't be string sadly
-                print(message[0], end=' ') #prints command on console
-                print(raw_message.author, end=' @') #print who sent the command
-                print(raw_message.server, end=':') #prints in console the server that the message was in with a ':' at the end
-                print(raw_message.channel) #prints the server's channel
-                await client.send_message(raw_message.channel, tapirs[random.randrange(images)]) #send random link from image list
-            elif message[0] in commands: #if not tapir checks if command in the the command dictionary
+            if message[0] in commands: #if not tapir checks if command in the the command dictionary
                 print(message[0], end=' ') #prints command on console
                 print(raw_message.author, end=' @') #prints message author
                 print(raw_message.server, end=':') #prints in console the server that the message was in with a ':' at the end
                 print(raw_message.channel) #prints the server's channel
-                await client.send_message(raw_message.channel, commands[message[0]]) #says the commands text
+                await client.send_message(raw_message.channel, commands[message[0]].format(tapirs[random.randrange(len(tapirs))])) #says the commands text
 
 
     
