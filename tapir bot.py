@@ -35,7 +35,9 @@ commands = {
     '!azwe': '<@118907180761088006> https://giphy.com/gifs/IEceC9q1MgWrK',
     '!ben' : 'http://i.imgur.com/OLKOQ6H.gif',
     '!2.4' : 'It\'s not just a meme! http://i.imgur.com/umBUjqW.gif',
-    '!tapir' : '{}'
+    '!tapir' : '{}',
+    '!taper' : '{}',
+    '!scam' : 'Star Citizen is a scam, confirmed by Chris Roberts himself: http://i.imgur.com/UK3D1c0.gifv'
 }
 
 @client.event #still don't know what this means
