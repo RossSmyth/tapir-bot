@@ -40,6 +40,10 @@ commands = {
     '!scam' : 'Star Citizen is a scam, confirmed by Chris Roberts himself: http://i.imgur.com/UK3D1c0.gifv'
 }
 
+
+georgie = 100
+pennywise = 100
+
 @client.event #still don't know what this means
 async def on_message(message): #probably means when someone sends a message
     channel = message.channel #defines the channel the messages is sent to as a variable
@@ -54,6 +58,44 @@ async def on_message(message): #probably means when someone sends a message
                 print(raw_message.server, end=':') #prints in console the server that the message was in with a ':' at the end
                 print(raw_message.channel) #prints the server's channel
                 await client.send_message(raw_message.channel, commands[message[0]].format(tapirs[random.randrange(len(tapirs))])) #says the commands text
+            elif message[0] == "!attack": #the attack command
+                if message[1] == "georgie": #if they call upon georgie
+                    if georgie > 0: #and he isn't dead
+                        attack = random.randrange(10) #he attacks with some damage
+                        global pennywise 
+                        pennywise -= attack #and damages pennywise
+                        if pennywise <= 0: #but if pennywise is dead
+                            await client.send_message(raw_message.channel, "Pennywise is dead!") #he's dead
+                        else:
+                            await client.send_message(raw_message.channel, "Georgie did {} points of damge to Pennywise, he only has {} left!".format(attack, pennywise)) #if not, he's not
+                    else:
+                        await client.send_message(raw_message.channel, "Georgie's dead dummy") #if georgie is dead, sucks
+                elif message[1] == "pennywise": #if they call upon pennywise
+                    if pennywise > 0: #and he iss not dead
+                        attack = random.randrange(10) #he attacks
+                        global georgie
+                        georgie -= attack #doess damage
+                        await client.send_message(raw_message.channel, "Pennywise did {} points of damge to Georgie, he only has {} left!".format(attack, georgie))
+                    else:
+                        await client.send_message(raw_message.channel, "Pennywise is dead dummy!")
+                elif message[1] == "reset":
+                    global georgie
+                    global pennywise
+                    georgie = 100
+                    pennywise = 100
+                    await client.send_message(raw_message.channel, "Healths have been reset")
+                else:
+                    await client.send_message(raw_message.channel, "That's not Georgie or Pennywise!") #if not the correct characters
+                print(message[0], end=' ') #prints command on console 
+                print(raw_message.author, end=' @') #prints message author
+                print(raw_message.server, end=':') #prints in console the server that the message was in with a ':' at the end
+                print(raw_message.channel) #prints the server's channel
+            elif message[0] == "!health": #shows their health
+                await client.send_message(raw_message.channel, "Georgie has {} and Pennywise has {}".format(georgie, pennywise))
+                print(message[0], end=' ') #prints command on console
+                print(raw_message.author, end=' @') #prints message author
+                print(raw_message.server, end=':') #prints in console the server that the message was in with a ':' at the end
+                print(raw_message.channel) #prints the server's channel
 
 
     
