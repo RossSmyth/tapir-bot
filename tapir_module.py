@@ -19,12 +19,13 @@ class tapirbot():
         self.pennywise = 100 #health of pennywise
         
         self.commands = { #command dictioinary
-    '!?' : 'Hello! I am a bot made by <@149281074437029890> . \n say `!tapir` to get a random tapir image! \n say `!carrack` for a Carrack picture. \n say `!azwe` for @Azwethinkweiz\'s beautiful mocap animation. \n say `!ben` to get Ben\'s beautiful dancing. \n say `!2.4` to get an update on the new 2.4 update. \n say `!scam` to know the truth of Star Citizen. \n say `!attack <pennywise or georgie>` to play the attacking minigame. say `!attack help` for more information',
+    '!?' : 'Hello! I am a bot made by <@149281074437029890> . \n say `!tapir` to get a random tapir image! \n say `!carrack` for a Carrack picture. \n say `!azwe` for @Azwethinkweiz\'s beautiful mocap animation. \n say `!ben` to get Ben\'s beautiful dancing. \n say `!2.4` to get an update on the new 2.4 update. \n say `!scam` to know the truth of Star Citizen. \n say `!attack <pennywise or georgie>` to play the attacking minigame. say `!attack help` for more information. \n say `!source` for my Github!',
     '!carrack' : 'Carrack pls http://i.imgur.com/BA3F1OI.png',
     '!azwe': '<@118907180761088006> https://giphy.com/gifs/IEceC9q1MgWrK',
     '!ben' : 'http://i.imgur.com/OLKOQ6H.gif',
     '!2.4' : 'It\'s not just a meme! http://i.imgur.com/umBUjqW.gif',
-    '!scam' : 'Star Citizen is a scam, confirmed by Chris Roberts himself: http://i.imgur.com/UK3D1c0.gifv'
+    '!scam' : 'Star Citizen is a scam, confirmed by Chris Roberts himself: http://i.imgur.com/UK3D1c0.gifv',
+    '!source' : 'My Github is here: https://github.com/treefroog/tapir-bot'
 }
     
     async def startup(self, client): #when the client starts it prints all this junk
@@ -34,7 +35,7 @@ class tapirbot():
         print("\nServers:") #puts "Servers" and a new line
         for s in client.servers: #lists the servers. Broken for all except TAPIR BOT server. Sometimes works. IDK why
             print(s.name)
-        print('------') #prints '------' at end of startup squence
+        print('----------') #prints '------' at end of startup squence
     
     async def print_message(self, message, raw_message): #prints the name of author and stuff
         """prints the name of author, commaand used, channel, and server that it was called in"""

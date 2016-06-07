@@ -1,7 +1,6 @@
 #https://discordapp.com/oauth2/authorize?&client_id=173642301921296385&scope=bot&permissions=0
 #random tapir bot
-#http://imgur.com/a/Nwp6c/
-#http://imgur.com/a/QAr54
+
 
 import random #imports the random module
 import discord #imports the discord api module thing
@@ -33,8 +32,7 @@ async def on_message(message): #when someone sends a message
             elif message[0] == '!tapir' or message[0] == '!taper': #the tapir command!
                 await tapir.print_message(message[0], raw_message) #gets the console stuff
                 await tapir.tapir(raw_message, client) #gets the tapir image
-            elif message[0] == '!attack':
-                await tapir.print_message(message[0], raw_message) #gets the console stuff
+            elif message[0] == '!attack' and raw_message.channel.id != '82210263440306176':
                 try:
                     await tapir.attack(message[1], raw_message, client)
                     await tapir.print_message(message[0], raw_message) #gets the console stuff
@@ -47,7 +45,7 @@ async def on_message(message): #when someone sends a message
                 tapir.tapirs.append(new_tapir) #also puts the link in the list for immediate usage
                 tapir.images = len(tapir.tapirs) #allows to use instantly
                 await tapir.print_message(message[0], raw_message) #prints on console
-                await client.send_message(raw_message.channel, "Got it!") #confirms the tapir
+                await client.send_message(raw_message.channel, "Got it! :thumbsup:") #confirms the tapir
             elif message[0] == '!close' and raw_message.author.id == '149281074437029890': #if you're me you can close tapir-bot
                 tapir.tapirs_text.close() #closes the tapir.txt
                 await client.logout() #logs tapir-bot out
@@ -55,4 +53,4 @@ async def on_message(message): #when someone sends a message
 
 
     
-client.run('bot_token') #bot token
+client.run('bot_tokeen') #bot token
