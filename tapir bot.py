@@ -6,96 +6,51 @@
 import random #imports the random module
 import discord #imports the discord api module thing
 import asyncio #imports asyncio
-
-#giant list of tapir picture links
-tapirs = ["http://i.imgur.com/tgPoQ9S.jpg", "http://i.imgur.com/n2BjyFA.png", "http://i.imgur.com/e18ZHri.png", "http://i.imgur.com/VJDf9s1.png", "http://i.imgur.com/dRAiEe4.png", "http://i.imgur.com/wdova3J.png", "http://i.imgur.com/tJjx4qK.png", "http://i.imgur.com/qeN3TjM.png", "http://i.imgur.com/tHPhFMa.gif", "http://i.imgur.com/WKQiNFw.jpg", "http://i.imgur.com/x4j0d90.jpg", "http://i.imgur.com/Rla6CxQ.jpg", "http://i.imgur.com/TvbXgVi.jpg", "http://i.imgur.com/14P5ikM.jpg", "http://i.imgur.com/ktviJuC.png", "http://i.imgur.com/6994eHI.png", "http://i.imgur.com/5NwpK4M.jpg", "http://i.imgur.com/tpcRmnE.jpg", "http://i.imgur.com/Q3fk7iI.png", "http://i.imgur.com/OXLj8ev.png", "http://i.imgur.com/OYTzAWh.jpg", "http://i.imgur.com/UkBNbfh.png", "http://i.imgur.com/oC8wpfE.png", "http://i.imgur.com/ysuEpzp.png", "http://i.imgur.com/H2LU6Yv.png", "http://i.imgur.com/fnPNxxz.png", "http://i.imgur.com/a6ULF53.png", "http://i.imgur.com/PwodKBZ.png", "http://i.imgur.com/8kzzOoV.png", "http://i.imgur.com/Qurbk2d.png", "http://i.imgur.com/EV4Xr1D.png", "http://i.imgur.com/g2gxNsq.jpg", "http://i.imgur.com/3TTRki4.jpg", "http://i.imgur.com/9MTpv1c.png", "http://i.imgur.com/7zVbBDQ.jpg", "http://i.imgur.com/xncjSd7.png", "http://i.imgur.com/4SiThqS.png", "http://i.imgur.com/A0kOELj.png", "http://i.imgur.com/6BgR8WB.png", "http://i.imgur.com/96Ue3sg.png", "http://i.imgur.com/oFrncNz.png", "http://i.imgur.com/q9KKE6D.png", "http://i.imgur.com/FhXFun1.png", "http://i.imgur.com/mxZtX8j.png", "http://i.imgur.com/BKUUzmO.png", "http://i.imgur.com/S1vKjhl.jpg", "http://i.imgur.com/MWuXrUO.png", "http://i.imgur.com/uzYhQ9W.png", "http://i.imgur.com/HM7oIKc.png", "http://i.imgur.com/ONGCZhO.gif", "http://i.imgur.com/MwgplL8.png", "http://i.imgur.com/R8y3v49.jpg", "http://i.imgur.com/QSC0cSu.png", "http://i.imgur.com/11ZBtG7.png", "http://i.imgur.com/XfyT4H5.gif", "http://i.imgur.com/oLC9AyL.jpg", "http://i.imgur.com/0KVeMLf.jpg", "http://i.imgur.com/MPBZafq.png", "http://i.imgur.com/7g7LHjf.png", "http://i.imgur.com/oxgAUQA.png", "http://i.imgur.com/2W42kNe.jpg", "http://i.imgur.com/KmuiOzA.jpg", "http://i.imgur.com/lGofpCK.jpg", "http://i.imgur.com/pllUFWw.jpg", "http://i.imgur.com/kr2w5TZ.png", "http://i.imgur.com/1nmhYLT.png", "http://i.imgur.com/NfWZFze.png", "http://i.imgur.com/l91ZWw1.png", "http://i.imgur.com/ss1jKr8.png", "http://i.imgur.com/EiYlaVb.png", "http://i.imgur.com/f3jl9Qi.png", "http://i.imgur.com/1jOb6Hb.png", "http://i.imgur.com/dyfC203.png", "http://i.imgur.com/MW4JNJt.png", "http://i.imgur.com/i4lt0Cg.png", "http://i.imgur.com/38qGdwX.png", "http://i.imgur.com/XebMxP5.png", "http://i.imgur.com/qZx3d3D.png", "http://i.imgur.com/vCy8rFr.png", "http://i.imgur.com/Mlywcnm.png", "http://i.imgur.com/Dmc2uM8.jpg", "http://i.imgur.com/9qKB1mk.png", "http://i.imgur.com/SkwJ8KZ.jpg", "http://i.imgur.com/9r35TCm.png", "http://i.imgur.com/WkzM3hh.png", "http://i.imgur.com/VGXNPtU.png", "http://i.imgur.com/fQegjXU.png", "http://i.imgur.com/jaZmvMs.jpg", "http://i.imgur.com/9j63Lov.png", "http://i.imgur.com/9kdYMx5.png", "http://i.imgur.com/R21a14U.png", "http://i.imgur.com/JJobslO.png", "http://i.imgur.com/KNPWux1.gif", "http://i.imgur.com/xxIdm31.gif", "http://i.imgur.com/q3oAWFt.png", "http://i.imgur.com/CYWQnuP.png", "http://i.imgur.com/7QeekYS.png", "http://i.imgur.com/EoUQCCX.png", "http://i.imgur.com/KYfjHot.png", "http://i.imgur.com/JuXH2bj.png", "http://i.imgur.com/A7SxRbS.png", "http://i.imgur.com/NDPnnJt.png", "http://i.imgur.com/5auCaYR.jpg", "http://i.imgur.com/WtepfQT.jpg", "http://i.imgur.com/yyNs8CK.jpg", "http://i.imgur.com/TPkprQp.jpg", "http://i.imgur.com/QKkwMb4.jpg", "http://i.imgur.com/SpTkfSe.png", "http://i.imgur.com/ARkCIh3.png", "http://i.imgur.com/lwgZz3y.jpg", "http://i.imgur.com/WWjdn1y.png", "http://i.imgur.com/YY0vemL.png", "http://i.imgur.com/alDQH24.png", "http://i.imgur.com/YMlJiNe.png", "http://i.imgur.com/7C9zku8.png", "http://i.imgur.com/iPSoLjm.png", "http://i.imgur.com/FCP1Tzq.png", "http://i.imgur.com/vE2XIEy.png", "http://i.imgur.com/aEcshrV.gif", "http://i.imgur.com/PgYNH9a.png", "http://i.imgur.com/TOvEB8a.png", "http://i.imgur.com/vZ4sYdu.png", "http://i.imgur.com/WZE99Mw.png", "http://i.imgur.com/cF5nXWa.jpg", "http://i.imgur.com/NGelpAd.png", "http://i.imgur.com/G3MOhCm.png", "http://i.imgur.com/wmJ7ICc.jpg", "http://i.imgur.com/6jvO9Yr.png", "http://i.imgur.com/F1lqJ87.png", "http://i.imgur.com/aFfDMyX.png", "http://i.imgur.com/Kjza1Q5.png"]
-
-images = len(tapirs) #so I don't have to manually count it, and able to add pictures easily
-
-current_game = "say \"!?\" for help" #string for the game being played. Don't forget escape characters!
+import tapir_module
 
 client = discord.Client() #easier coding!
 
+tapir = tapir_module.tapirbot() #initializes the tapir
 
-@client.event #haha I don't know what this means
+@client.event
 async def on_ready(): #same here, maybe when bot is ready it does the thing
-    await client.change_status(game=discord.Game(name=current_game)) #puts a help command in the game played
-    print('Logged in as') #I know this one
-    print(client.user.name) #prints the bots user name
-    print("\nServers:") #puts "Servers" and a new line
-    for s in client.servers: #lists the servers. Broken for all except TAPIR BOT server. Sometimes works. IDK why
-        print(s.name)
-    print('------') #prints '------' at end of startup squence
+    """the client starting up, once up, what it doess"""
+    await client.change_status(game=discord.Game(name=tapir.current_game)) #puts a help command in the game played
+    await tapir.startup(client)
     
-
-#command dictionary
-commands = {
-    '!?' : 'Hello! I am a bot made by <@149281074437029890> . \nType `!tapir` to get a random tapir image! \n`!carrack` says \'Carrack pls\' and puts a Carrack picture.',
-    '!carrack' : 'Carrack pls http://i.imgur.com/BA3F1OI.png',
-    '!azwe': '<@118907180761088006> https://giphy.com/gifs/IEceC9q1MgWrK',
-    '!ben' : 'http://i.imgur.com/OLKOQ6H.gif',
-    '!2.4' : 'It\'s not just a meme! http://i.imgur.com/umBUjqW.gif',
-    '!tapir' : '{}',
-    '!taper' : '{}',
-    '!scam' : 'Star Citizen is a scam, confirmed by Chris Roberts himself: http://i.imgur.com/UK3D1c0.gifv'
-}
-
-
-georgie = 100
-pennywise = 100
-
-@client.event #still don't know what this means
-async def on_message(message): #probably means when someone sends a message
+@client.event
+async def on_message(message): #when someone sends a message
+    """the stuff that happens when a message is sent"""
     channel = message.channel #defines the channel the messages is sent to as a variable
-    raw_message = message #the raw message is saved
+    raw_message = message #the message content is ssaved
     message = message.content.lower() #the message is put into a lower case format
     if len(message) >= 1: #must have atleast one character in the message
         message = message.split(' ') #message is made into a list split at every ' '
         if message[0].startswith('!'): #prefix is defined as '!'
-            if message[0] in commands: #if not tapir checks if command in the the command dictionary
-                print(message[0], end=' ') #prints command on console
-                print(raw_message.author, end=' @') #prints message author
-                print(raw_message.server, end=':') #prints in console the server that the message was in with a ':' at the end
-                print(raw_message.channel) #prints the server's channel
-                await client.send_message(raw_message.channel, commands[message[0]].format(tapirs[random.randrange(len(tapirs))])) #says the commands text
-            elif message[0] == "!attack": #the attack command
-                if message[1] == "georgie": #if they call upon georgie
-                    if georgie > 0: #and he isn't dead
-                        attack = random.randrange(10) #he attacks with some damage
-                        global pennywise 
-                        pennywise -= attack #and damages pennywise
-                        if pennywise <= 0: #but if pennywise is dead
-                            await client.send_message(raw_message.channel, "Pennywise is dead!") #he's dead
-                        else:
-                            await client.send_message(raw_message.channel, "Georgie did {} points of damge to Pennywise, he only has {} left!".format(attack, pennywise)) #if not, he's not
-                    else:
-                        await client.send_message(raw_message.channel, "Georgie's dead dummy") #if georgie is dead, sucks
-                elif message[1] == "pennywise": #if they call upon pennywise
-                    if pennywise > 0: #and he iss not dead
-                        attack = random.randrange(10) #he attacks
-                        global georgie
-                        georgie -= attack #doess damage
-                        await client.send_message(raw_message.channel, "Pennywise did {} points of damge to Georgie, he only has {} left!".format(attack, georgie))
-                    else:
-                        await client.send_message(raw_message.channel, "Pennywise is dead dummy!")
-                elif message[1] == "reset":
-                    global georgie
-                    global pennywise
-                    georgie = 100
-                    pennywise = 100
-                    await client.send_message(raw_message.channel, "Healths have been reset")
-                else:
-                    await client.send_message(raw_message.channel, "That's not Georgie or Pennywise!") #if not the correct characters
-                print(message[0], end=' ') #prints command on console 
-                print(raw_message.author, end=' @') #prints message author
-                print(raw_message.server, end=':') #prints in console the server that the message was in with a ':' at the end
-                print(raw_message.channel) #prints the server's channel
-            elif message[0] == "!health": #shows their health
-                await client.send_message(raw_message.channel, "Georgie has {} and Pennywise has {}".format(georgie, pennywise))
-                print(message[0], end=' ') #prints command on console
-                print(raw_message.author, end=' @') #prints message author
-                print(raw_message.server, end=':') #prints in console the server that the message was in with a ':' at the end
-                print(raw_message.channel) #prints the server's channel
+            if message[0] in tapir.commands: #if not tapir checks if command in the the command dictionary
+                await tapir.print_message(message[0], raw_message) #gets the console stuff
+                await client.send_message(raw_message.channel, tapir.commands[message[0]]) #says the commands text
+            elif message[0] == '!tapir' or message[0] == '!taper': #the tapir command!
+                await tapir.print_message(message[0], raw_message) #gets the console stuff
+                await tapir.tapir(raw_message, client) #gets the tapir image
+            elif message[0] == '!attack':
+                await tapir.print_message(message[0], raw_message) #gets the console stuff
+                try:
+                    await tapir.attack(message[1], raw_message, client)
+                    await tapir.print_message(message[0], raw_message) #gets the console stuff
+                except IndexError:
+                    await client.send_message(raw_message.channel, "Whoops, you forgot to specify a character!")
+                    await tapir.print_message("Attack_list_error", raw_message)
+            elif message[0] == '!add_tapir' and raw_message.author.id == '149281074437029890': #add tapirs to the text if you are me :)
+                tapir.tapirs_text.write(message[1] + "\n") #adds the link and a line ender thing (can't remember name)
+                tapir.tapirs.append(message[1]) #also puts the link in the list for immediate usage
+                tapir.images = len(tapir.tapirs) #allows to use instantly
+                await tapir.print_message(message[0], raw_message) #prints on console
+                await client.send_message(raw_message.channel, "Got it!") #confirms the tapir
+            elif message[0] == '!close' and raw_message.author.id == '149281074437029890': #if you're me you can close tapir-bot
+                tapir.tapirs_text.close() #closes the tapir.txt
+                await client.logout() #logs tapir-bot out
+            
 
 
     
