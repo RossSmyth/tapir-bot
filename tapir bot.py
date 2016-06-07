@@ -42,8 +42,9 @@ async def on_message(message): #when someone sends a message
                     await client.send_message(raw_message.channel, "Whoops, you forgot to specify a character!")
                     await tapir.print_message("Attack_list_error", raw_message)
             elif message[0] == '!add_tapir' and raw_message.author.id == '149281074437029890': #add tapirs to the text if you are me :)
-                tapir.tapirs_text.write(message[1] + "\n") #adds the link and a line ender thing (can't remember name)
-                tapir.tapirs.append(message[1]) #also puts the link in the list for immediate usage
+                new_tapir = raw_message.content.split(' ')[1]
+                tapir.tapirs_text.write(new_tapir + "\n") #adds the link and a line ender thing (can't remember name)
+                tapir.tapirs.append(new_tapir) #also puts the link in the list for immediate usage
                 tapir.images = len(tapir.tapirs) #allows to use instantly
                 await tapir.print_message(message[0], raw_message) #prints on console
                 await client.send_message(raw_message.channel, "Got it!") #confirms the tapir
