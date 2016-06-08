@@ -35,7 +35,7 @@ class tapirbot():
         print("\nServers:") #puts "Servers" and a new line
         for s in client.servers: #lists the servers. Broken for all except TAPIR BOT server. Sometimes works. IDK why
             print(s.name)
-        print('----------') #prints '------' at end of startup squence
+        print('----------------') #prints '------' at end of startup squence
     
     async def print_message(self, message, raw_message): #prints the name of author and stuff
         """prints the name of author, commaand used, channel, and server that it was called in"""
@@ -43,6 +43,21 @@ class tapirbot():
         print(raw_message.author, end=' @') #prints message author
         print(raw_message.server, end=':') #prints in console the server that the message was in with a ':' at the end
         print(raw_message.channel) #prints the server's channel
+        
+    async def private_message_recieved(self, raw_message, client): #when tapir-bot recieves a private message
+        """sends me a private message of the channel ID and the author name and content"""
+        await client.send_message(client.get_channel('173957638302728192'), raw_message.channel.id + ' : ' + raw_message.author.name + '\n' + raw_message.content)
+    
+    async def send_message(self, raw_message, client):
+        """I send a message, through tapir-bot"""
+        message = raw_message.content.split(' ') #makes the message a list of the words
+        receiver = message[1] #the channel is the ID I send
+        receiver = client.get_channel(receiver) #it makes that into a channel class
+        del message[0:2] #in messsage it deletes thee first two indexes
+        message = ' '.join(message) #joins the list back together with a space inbeetween the indexes
+        print(str(receiver) + ' : ' + message) #on consol it prints the channel and the message
+        await client.send_message(receiver, message) #send the message
+        
     
     async def tapir(self, message, client): #when someone calls the !tapir command
         """the tapir command function"""

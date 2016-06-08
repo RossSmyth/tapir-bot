@@ -32,11 +32,11 @@ async def on_message(message): #when someone sends a message
             elif message[0] == '!tapir' or message[0] == '!taper': #the tapir command!
                 await tapir.print_message(message[0], raw_message) #gets the console stuff
                 await tapir.tapir(raw_message, client) #gets the tapir image
-            elif message[0] == '!attack' and raw_message.channel.id != '82210263440306176':
-                try:
+            elif message[0] == '!attack' and raw_message.channel.id != '82210263440306176': #attack command! It doesn't go to /r/starcitizen's general channel
+                try: #caususe index errors happen
                     await tapir.attack(message[1], raw_message, client)
                     await tapir.print_message(message[0], raw_message) #gets the console stuff
-                except IndexError:
+                except IndexError: #if someone is dumb and forgets the character to play as
                     await client.send_message(raw_message.channel, "Whoops, you forgot to specify a character!")
                     await tapir.print_message("Attack_list_error", raw_message)
             elif message[0] == '!add_tapir' and raw_message.author.id == '149281074437029890': #add tapirs to the text if you are me :)
@@ -46,11 +46,17 @@ async def on_message(message): #when someone sends a message
                 tapir.images = len(tapir.tapirs) #allows to use instantly
                 await tapir.print_message(message[0], raw_message) #prints on console
                 await client.send_message(raw_message.channel, "Got it! :thumbsup:") #confirms the tapir
+            elif message[0] == '!reply' and raw_message.author.id == '149281074437029890': #can communicate through tapir-bot
+                await tapir.send_message(raw_message, client)
             elif message[0] == '!close' and raw_message.author.id == '149281074437029890': #if you're me you can close tapir-bot
                 tapir.tapirs_text.close() #closes the tapir.txt
                 await client.logout() #logs tapir-bot out
+        elif raw_message.channel.is_private and not raw_message.author.id == '173648334479687681': #if it has no command but is PMed to tapir-bot it will tell me
+            print(raw_message.author.name + ' private message')
+            await tapir.private_message_recieved(raw_message, client)
+        
             
 
 
     
-client.run('bot_tokeen') #bot token
+client.run('bot_token') #bot token
