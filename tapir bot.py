@@ -1,71 +1,113 @@
-#https://discordapp.com/oauth2/authorize?&client_id=173642301921296385&scope=bot&permissions=0
-#random tapir bot
+from discord.ext import commands
+import discord
+from cogs.utils import checks
+import datetime, re
+import json, asyncio
+import copy
+import logging
+import traceback
+import sys
+from collections import Counter
 
+description = """
+I am a bot written by treefroog to provide tapirs
+"""
 
-import random #imports the random module
-import discord #imports the discord api module thing
-import asyncio #imports asyncio
-import tapir_module
+initial_extensions = [
+    'cogs.admin',
+    'cogs.meta',
+    'cogs.mod'
+    ]
 
-client = discord.Client() #easier coding!
+discord_logger = logging.getLogger('discord')
+discord_logger.setLevel(logging.CRITICAL)
+log = logging.getLogger()
+log.setLevel(logging.INFO)
+handler = logging.FileHandler(filename='tapir-bot.log', encoding='utf-8', mode='w')
+log.addHandler(handler)
 
-tapir = tapir_module.tapirbot() #initializes the tapir
+help_attrs = dict(hidden=True)
 
-@client.event
-async def on_ready(): #same here, maybe when bot is ready it does the thing
-    """the client starting up, once up, what it doess"""
-    await client.change_status(game=discord.Game(name=tapir.current_game)) #puts a help command in the game played
-    await tapir.startup(client)
-    
-@client.event
-async def on_message(message): #when someone sends a message
-    """the stuff that happens when a message is sent"""
-    channel = message.channel #defines the channel the messages is sent to as a variable
-    raw_message = message #the message content is ssaved
-    message = message.content.lower() #the message is put into a lower case format
-    if len(message) >= 1: #must have atleast one character in the message
-        message = message.split(' ') #message is made into a list split at every ' '
-        if message[0].startswith('!'): #prefix is defined as '!'
-            try:
-                if message[0] in tapir.commands: #if not tapir checks if command in the the command dictionary
-                    await tapir.print_message(message[0], raw_message) #gets the console stuff
-                    await client.send_message(raw_message.channel, tapir.commands[message[0]]) #says the commands text
-                elif message[0] == '!tapir' or message[0] == '!taper': #the tapir command!
-                    await tapir.print_message(message[0], raw_message) #gets the console stuff
-                    await tapir.tapir(raw_message, client) #gets the tapir image
-                elif message[0] == '!add_tapir' and raw_message.author.id == '149281074437029890': #add tapirs to the text if you are me :)
-                    new_tapir = raw_message.content.split(' ')[1]
-                    tapir.tapirs_text.write(new_tapir + "\n") #adds the link and a line ender thing (can't remember name)
-                    tapir.tapirs.append(new_tapir) #also puts the link in the list for immediate usage
-                    tapir.images = len(tapir.tapirs) #allows to use instantly
-                    await tapir.print_message(message[0], raw_message) #prints on console
-                    await client.send_message(raw_message.channel, "Got it! :thumbsup:") #confirms the tapir
-                elif message[0] == '!reply' and raw_message.author.id == '149281074437029890': #can communicate through tapir-bot
-                    await tapir.send_message(raw_message, client)
-                elif message[0] == '!close' and raw_message.author.id == '149281074437029890': #if you're me you can close tapir-bot
-                    tapir.tapirs_text.close() #closes the tapir.txt
-                    await client.logout() #logs tapir-bot out
-                elif message[0] == '!attack' and message[1] == 'define' and raw_message.channel.id != '82210263440306176': #to define a attacking pair
-                        await tapir.print_message(message[1], raw_message) #prints to the console
-                        await tapir.define(message[2:5:2], raw_message, client) #calls the define function
-                elif message[0] == '!attack' and message[1] == 'reset' and raw_message.channel.id != '82210263440306176': #the reset function of attack
-                        await tapir.print_message(message[1], raw_message)
-                        await tapir.reset(raw_message, client)
-                elif message[0] == '!attack' and raw_message.channel.id != '82210263440306176': #attack command! It doesn't go to /r/starcitizen's general channel
-                    try: #caususe index errors happen
-                        await tapir.attack(message[1:4:2], raw_message, client) #does the attacking
-                        await tapir.print_message(message[0], raw_message) #gets the console stuff
-                    except IndexError: #if someone is dumb and forgets the character to play as
-                        await client.send_message(raw_message.channel, "Whoops, you forgot did something wrong!")
-                        await tapir.print_message("Attack_list_error", raw_message)
-            except:
-                pass
-        elif raw_message.channel.is_private and not raw_message.author.id == '173648334479687681': #if it has no command but is PMed to tapir-bot it will tell me
-            print(raw_message.author.name + ' private message')
-            await tapir.private_message_recieved(raw_message, client)
+bot = commands.Bot(command_prefix=['!'], description=description, pm_help=None, help_attrs=help_attrs)
+
+@bot.event
+async def on_command_error(error, ctx):
+    if isinstance(error, commands.NoPrivateMessage):
+        await bot.send_message(ctx.message.author, 'This command cannot be used in private messages.')
+    elif isinstance(error, commands.DisabledCommand):
+        await bot.send_message(ctx.message.author, 'Sorry. This command is disabled and cannot be used.')
+    elif isinstance(error, commands.CommandInvokeError):
+        print('In {0.command.qualified_name}:'.format(ctx), file=sys.stderr)
+        traceback.print_tb(error.original.__traceback__)
+        print('{0.__class__.__name__}: {0}'.format(error.original), file=sys.stderr)
         
-            
+        
+@bot.event
+async def on_ready():
+    print('Logged in as:')
+    print('Username: ' + bot.user.name)
+    print('ID: ' + bot.user.id)
+    for s in bot.servers:
+        print(s.name)
+    print('----------')
+    if not hasattr(bot, 'uptime'):
+        bot.uptime = datetime.datetime.utcnow()
 
+@bot.event
+async def on_message(message):
+    if message.author == bot.user:
+        return
 
-    
-client.run('bot_token') #bot token
+    if message.author.bot:
+        return
+
+    mod = bot.get_cog('Mod')
+
+    if mod is not None and not checks.is_owner_check(message):
+        # check if the user is bot banned
+        if message.author.id in mod.config.get('plonks', []):
+            return
+
+        # check if the channel is ignored
+        # but first, resolve their permissions
+
+        perms = message.channel.permissions_for(message.author)
+        bypass_ignore = perms.manage_roles
+
+        # if we don't have manage roles then we should
+        # check if it's the owner of the bot or they have Bot Admin role.
+
+        if not bypass_ignore:
+            if not message.channel.is_private:
+                bypass_ignore = discord.utils.get(message.author.roles, name='Bot Admin') is not None
+
+        # now we can finally realise if we can actually bypass the ignore.
+
+        if not bypass_ignore:
+            if message.channel.id in mod.config.get('ignored', []):
+                return
+
+    await bot.process_commands(message)
+
+def load_credentials():
+    with open('credentials.json') as f:
+        return json.load(f)
+        
+if __name__ == '__main__':
+    if any('debug' in arg.lower() for arg in sys.argv):
+        bot.command_prefix = '!'
+
+    credentials = load_credentials()
+    bot.client_id = credentials['client_id']
+    bot.commands_used = Counter()
+    for extension in initial_extensions:
+        try:
+            bot.load_extension(extension)
+        except Exception as e:
+            print('Failed to load extension {}\n{}: {}'.format(extension, type(e).__name__, e))
+
+    bot.run(credentials['token'])
+    handlers = log.handlers[:]
+    for hdlr in handlers:
+        hdlr.close()
+        log.removeHandler(hdlr)
