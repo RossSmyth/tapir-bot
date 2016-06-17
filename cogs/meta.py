@@ -19,13 +19,18 @@ class Meta:
         """Displays my hello message."""
         await self.bot.say('Hello! I\'m a bot made by <@149281074437029890>')
         
+    @commands.command(hidden=True)
+    async def source(self):
+        """displays link to github"""
+        await self.bot.say('Github: https://github.com/treefroog/tapir-bot')
+        
     @commands.command(rest_is_raw=True, hidden=True, aliases=['say'])
     @checks.is_owner()
     async def echo(self, *, content):
         """says stuff that I tell it to"""
         await self.bot.say(content)
         
-    @commands.command(name='quit', hidden=True)
+    @commands.command(name='quit', hidden=True, aliases=['close'])
     @checks.is_owner()
     async def _quit(self):
         """quits tapir-bot"""

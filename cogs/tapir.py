@@ -10,12 +10,10 @@ class Tapir:
     def __init__(self, bot):
         self.bot = bot
         
-        self.config = config.Config('tapirs.json', loop=bot.loop)
-        
     @commands.command()
     async def tapir(self):
         """The wonderful tapir command that outputs a random tapir"""
-        tapir_file = config.Config('tapirs.json', loop=bot.loop)
+        tapir_file = config.Config('tapirs.json')
         tapirs = tapir_file.get('tapirs')
         tapir = tapirs[random.randrange(len(tapirs))]
         await self.bot.say(tapir)

@@ -15,7 +15,7 @@ class Mod:
     def bot_user(self, message):
         return message.server.me if message.channel.is_private else self.bot.user
 
-    @commands.group(pass_context=True, no_pm=True)
+    @commands.group(pass_context=True, no_pm=True, hidden=True)
     @checks.admin_or_permissions(manage_channels=True)
     async def ignore(self, ctx):
         """Handles the bot's ignore lists.
@@ -102,6 +102,47 @@ class Mod:
             await self.bot.say('Channel was not ignored in the first place.')
         else:
             await self.bot.say('\U0001f44c')
+            
+    @commands.command(no_pm=True)
+    @checks.admin_or_permissions(manage_server=True)
+    async def plonk(self, *, member : discord.Member):
+        """Bans a user from using the bot.
+        Note that this ban is **global**. So they are banned from
+        all servers that they access the bot with. So use this with
+        caution.
+        There is no way to bypass a plonk regardless of role or permissions.
+        The only person who cannot be plonked is the bot creator. So this
+        must be used with caution.
+        To use this command you must have the Manage Server permission
+        or have a Bot Admin role.
+        """
+
+        plonks = self.config.get('plonks', [])
+        if member.id in plonks:
+            await self.bot.say('That user is already bot banned.')
+            return
+
+        plonks.append(member.id)
+        await self.config.put('plonks', plonks)
+        await self.bot.say('{0.name} has been banned from using the bot.'.format(member))
+        
+    @commands.command(no_pm=True)
+    @checks.admin_or_permissions(manage_server=True)
+    async def unplonk(self, *, member : discord.Member):
+        """Unbans a user from using the bot.
+        To use this command you must have the Manage Server permission
+        or have a Bot Admin role.
+        """
+
+        plonks = self.config.get('plonks', [])
+
+        try:
+            plonks.remove(member.id)
+        except ValueError:
+            pass
+        else:
+            await self.config.put('plonks', plonks)
+            await self.bot.say('{0.name} has been unbanned from using the bot.'.format(member))
             
 def setup(bot):
     bot.add_cog(Mod(bot))

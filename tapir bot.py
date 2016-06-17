@@ -10,13 +10,16 @@ import sys
 from collections import Counter
 
 description = """
-I am a bot written by treefroog to provide tapirs
+I am a bot written by <@149281074437029890> to provide tapirs! \n \nThis is a list of cogs along with their associated commands.
 """
 
 initial_extensions = [
     'cogs.admin',
     'cogs.meta',
-    'cogs.mod'
+    'cogs.mod',
+    'cogs.tapir',
+    'cogs.ships',
+    'cogs.star_citizen'
     ]
 
 discord_logger = logging.getLogger('discord')
@@ -26,12 +29,13 @@ log.setLevel(logging.INFO)
 handler = logging.FileHandler(filename='tapir-bot.log', encoding='utf-8', mode='w')
 log.addHandler(handler)
 
-help_attrs = dict(hidden=True)
+help_attrs = dict(hidden=True, name='halp')
 
 bot = commands.Bot(command_prefix=['!'], description=description, pm_help=None, help_attrs=help_attrs)
 
 @bot.event
 async def on_command_error(error, ctx):
+    """some custom error stuff"""
     if isinstance(error, commands.NoPrivateMessage):
         await bot.send_message(ctx.message.author, 'This command cannot be used in private messages.')
     elif isinstance(error, commands.DisabledCommand):
@@ -44,6 +48,8 @@ async def on_command_error(error, ctx):
         
 @bot.event
 async def on_ready():
+    """what happens when tapir-bot connects to the discord api"""
+    await bot.change_status(game=discord.Game(name='Say <insert command here> for help!'))
     print('Logged in as:')
     print('Username: ' + bot.user.name)
     print('ID: ' + bot.user.id)
@@ -52,9 +58,23 @@ async def on_ready():
     print('----------')
     if not hasattr(bot, 'uptime'):
         bot.uptime = datetime.datetime.utcnow()
+        
+@bot.event
+async def on_command(command, ctx):
+    """when a command happens it logs it"""
+    bot.commands_used[command.name] += 1
+    message = ctx.message
+    destination = None
+    if message.channel.is_private:
+        destination = 'Private Message'
+    else:
+        destination = '#{0.channel.name} ({0.server.name})'.format(message)
+
+    log.info('{0.timestamp}: {0.author.name} in {1}: {0.content}'.format(message, destination))
 
 @bot.event
 async def on_message(message):
+    """Some message checking stuff"""
     if message.author == bot.user:
         return
 
@@ -90,6 +110,7 @@ async def on_message(message):
     await bot.process_commands(message)
 
 def load_credentials():
+    """loads the credentials file with important stuff in it"""
     with open('credentials.json') as f:
         return json.load(f)
         

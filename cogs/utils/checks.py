@@ -6,16 +6,16 @@ def is_owner_check(message):
     return message.author.id == '149281074437029890'
 
 def is_owner():
-    """is me but diffent"""
+    """is me but a decorator"""
     return commands.check(lambda ctx: is_owner_check(ctx.message))
 
 """
 There is now a permissions system!
 if you don't meet a permission to do a command, nothing really happens
-but if you are the owner or a so called bot mod you can do stuff
+but if you are the owner or a so called bot admin or a server admin or
 if you are the owner (treefroog) you can do any command
-'it just works'
--todd howard
+"'it just works'
+-todd howard"
 -micheal scott
 """
 
@@ -31,7 +31,7 @@ def check_permissions(ctx, perms):
     return all(getattr(resolved, name, None) == value for name, value in perms.items())
     
 def role_or_permissions(ctx, check, **perms):
-    """checks roles or permissions, since rolees can do some stuff"""
+    """checks roles or permissions, since roles can do some stuff"""
     if check_permissions(ctx, perms):
         return True
 
