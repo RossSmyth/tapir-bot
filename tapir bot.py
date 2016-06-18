@@ -10,7 +10,7 @@ import sys
 from collections import Counter
 
 description = """
-I am a bot written by <@149281074437029890> to provide tapirs! \n \nThis is a list of cogs along with their associated commands.
+I am a bot written by treefroog to provide tapirs! \n \nThis is a list of cogs along with their associated commands:
 """
 
 initial_extensions = [
@@ -26,7 +26,7 @@ discord_logger = logging.getLogger('discord')
 discord_logger.setLevel(logging.CRITICAL)
 log = logging.getLogger()
 log.setLevel(logging.INFO)
-handler = logging.FileHandler(filename='tapir-bot.log', encoding='utf-8', mode='w')
+handler = logging.FileHandler(filename='tapir-bot.log', encoding='utf-8', mode='r+')
 log.addHandler(handler)
 
 help_attrs = dict(hidden=True, name='halp')
@@ -49,7 +49,7 @@ async def on_command_error(error, ctx):
 @bot.event
 async def on_ready():
     """what happens when tapir-bot connects to the discord api"""
-    await bot.change_status(game=discord.Game(name='Say <insert command here> for help!'))
+    await bot.change_status(game=discord.Game(name='Say `!halp` for help!'))
     print('Logged in as:')
     print('Username: ' + bot.user.name)
     print('ID: ' + bot.user.id)
