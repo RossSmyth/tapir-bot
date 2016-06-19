@@ -28,7 +28,7 @@ class Mod:
         if ctx.invoked_subcommand is None:
             await self.bot.say('Invalid subcommand passed: {0.subcommand_passed}'.format(ctx))
             
-    @ignore.command(name='list', pass_context=True)
+    @ignore.command(name='list', pass_context=True, hidden=True)
     async def ignore_list(self, ctx):
         """Tells you what channels are currently ignored in this server."""
 
@@ -44,7 +44,7 @@ class Mod:
         else:
             await self.bot.say('I am not ignoring any channels here.')
             
-    @ignore.command(name='channel', pass_context=True)
+    @ignore.command(name='channel', pass_context=True, hidden=True)
     async def channel_cmd(self, ctx, *, channel : discord.Channel = None):
         """Ignores a specific channel from being processed.
         If no channel is specified, the current channel is ignored.
@@ -64,7 +64,7 @@ class Mod:
         await self.config.put('ignored', ignored)
         await self.bot.say('\U0001f44c')
         
-    @ignore.command(name='all', pass_context=True)
+    @ignore.command(name='all', pass_context=True, hidden=True)
     @checks.admin_or_permissions(manage_server=True)
     async def _all(self, ctx):
         """Ignores every channel in the server from being processed.
@@ -81,7 +81,7 @@ class Mod:
         await self.config.put('ignored', list(set(ignored))) # make unique
         await self.bot.say('\U0001f44c')
         
-    @commands.command(pass_context=True, no_pm=True)
+    @commands.command(pass_context=True, no_pm=True, hidden=True)
     @checks.admin_or_permissions(manage_channels=True)
     async def unignore(self, ctx, *, channel : discord.Channel = None):
         """Unignores a specific channel from being processed.
@@ -103,7 +103,7 @@ class Mod:
         else:
             await self.bot.say('\U0001f44c')
             
-    @commands.command(no_pm=True)
+    @commands.command(no_pm=True, hidden=True)
     @checks.admin_or_permissions(manage_server=True)
     async def plonk(self, *, member : discord.Member):
         """Bans a user from using the bot.
@@ -126,7 +126,7 @@ class Mod:
         await self.config.put('plonks', plonks)
         await self.bot.say('{0.name} has been banned from using the bot.'.format(member))
         
-    @commands.command(no_pm=True)
+    @commands.command(no_pm=True, hidden=True)
     @checks.admin_or_permissions(manage_server=True)
     async def unplonk(self, *, member : discord.Member):
         """Unbans a user from using the bot.
