@@ -14,12 +14,12 @@ class Meta:
     def __init__(self, bot):
         self.bot = bot
     
-    @commands.command(hidden=True)
+    @commands.command()
     async def hello(self):
         """Displays my hello message."""
         await self.bot.say('Hello! I\'m a bot made by <@149281074437029890>')
         
-    @commands.command(hidden=True)
+    @commands.command()
     async def source(self):
         """displays link to github"""
         await self.bot.say('Github: https://github.com/treefroog/tapir-bot')

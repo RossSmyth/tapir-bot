@@ -17,12 +17,12 @@ class Tapir:
         tapirs = tapir_file.get('tapirs')
         tapir = tapirs[random.randrange(len(tapirs))]
         await self.bot.say(tapir)
-    
+
     @commands.command(hidden=True)
     @checks.is_owner()
     async def save_tapir(self, *, tapir):
         """allows the saving of a tapirs"""
-        tapir_file = config.Config('tapirs.json', loop=bot.loop)
+        tapir_file = config.Config('tapirs.json')
         tapirs = tapir_file.get('tapirs')
         tapirs.append(tapir)
         tapir_file.put(tapirs)
