@@ -11,7 +11,7 @@ class Misc:
         
     @commands.command()
     async def azwe(self):
-		"""Azwe's dancing animation"""
+        """Azwe's dancing animation"""
         self.bot.say('<@118907180761088006> https://giphy.com/gifs/IEceC9q1MgWrK')
         
 def setup(bot):

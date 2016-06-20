@@ -17,13 +17,13 @@ class Ships:
         
     @ship.command(pass_context=True)
     async def carrack(self):
-		"""The majestic Carrack"""
+        """The majestic Carrack"""
         await self.bot.say('Carrack pls http://i.imgur.com/BA3F1OI.png')
-		
-	@ship.command(pass_context=True)
-	async def dragonfly(self):
-		"""The nimble Dragonfly"""
-		await self.bot.say('Here ya go: http://imgur.com/a/msSaN')
+
+    @ship.command(pass_context=True)
+    async def dragonfly(self):
+        """The nimble Dragonfly"""
+        await self.bot.say('Here ya go: http://imgur.com/a/msSaN')
         
 def setup(bot):
     bot.add_cog(Ships(bot))

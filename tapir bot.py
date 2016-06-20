@@ -73,12 +73,11 @@ async def on_command(command, ctx):
     log.info('{0.timestamp}: {0.author.name} in {1}: {0.content}'.format(message, destination))
 
 @bot.event
-@bot.listen
 async def on_message(message):
     """Some message checking stuff"""
-	"""The tapir emoji"""
-		if ':tapir:' in message.content.lower() and message.server.id == '82210263440306176':
-			await self.bot.send_file(message.channel, 'emoji.png')
+    """The tapir emoji"""
+    if ':tapir:' in message.content.lower() and message.server.id == '82210263440306176':
+        await self.bot.send_file(message.channel, 'emoji.png')
     if message.author == bot.user:
         return
 
@@ -110,6 +109,8 @@ async def on_message(message):
         if not bypass_ignore:
             if message.channel.id in mod.config.get('ignored', []):
                 return
+
+    message.content = message.content.lower()
 
     await bot.process_commands(message)
 
