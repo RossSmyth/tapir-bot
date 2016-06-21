@@ -19,7 +19,8 @@ initial_extensions = [
     'cogs.mod',
     'cogs.tapir',
     'cogs.ships',
-    'cogs.star_citizen'
+    'cogs.star_citizen',
+    'cogs.xkcd'
     ]
 
 discord_logger = logging.getLogger('discord')
