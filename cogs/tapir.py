@@ -26,6 +26,7 @@ class Tapir:
         tapirs = tapir_file.get('tapirs')
         tapirs.append(tapir)
         tapir_file.put(tapirs)
+        self.bot.say('\N{OK HAND SIGN}')
         
 def setup(bot):
     bot.add_cog(Tapir(bot))
