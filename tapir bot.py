@@ -77,7 +77,7 @@ async def on_command(command, ctx):
 async def on_message(message):
     """Some message checking stuff"""
     """The tapir emoji"""
-    if ':tapir:' in message.content.lower() and message.server.id == '82210263440306176':
+    if ':tapir:' in message.content and message.server.id == '82210263440306176':
         await self.bot.send_file(message.channel, 'emoji.png')
     if message.author == bot.user:
         return

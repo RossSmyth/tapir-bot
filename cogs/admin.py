@@ -64,6 +64,8 @@ class Admin:
             'author': ctx.message.author
         }
 
+        env.update(globals())
+
         try:
             result = eval(code, env)
             if inspect.isawaitable(result):
