@@ -18,7 +18,7 @@ class Ships:
 	@ship.command(pass_context=True)
 	async def carrack(self):
 		"""The majestic Carrack"""
-		await self.bot.say('Carrack pls http://i.imgur.com/BA3F1OI.png')
+		await self.bot.say('Carrack pls http://i.imgur.com/BA3F1OI.png \n Rest of album: http://imgur.com/a/8cPzB')
 
 	@ship.command(pass_context=True)
 	async def dragonfly(self):
