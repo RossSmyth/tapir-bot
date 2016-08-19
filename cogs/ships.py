@@ -74,6 +74,11 @@ class Ships:
 	async def jump_snub(self):
 		"""The 890's snub, the 85X"""
 		await self.boy.say('Here ya go: http://imgur.com/a/cOzff')
+		
+	@ship.command(name='85x', pass_context=True)
+	async def idris(self):
+		"""The Idris frigate"""
+		await self.boy.say('Here ya go: http://imgur.com/a/z8dPb')
 
 def setup(bot):
 	bot.add_cog(Ships(bot))
