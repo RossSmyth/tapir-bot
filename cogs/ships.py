@@ -69,6 +69,11 @@ class Ships:
 	async def sabre(self):
 		"""The Stealthy Sabre fighter"""
 		await self.boy.say('Here ya go: http://imgur.com/a/jEiYX')
+		
+	@ship.command(pass_context=True)
+	async def 85X(self):
+		"""The 890's snub, the 85X"""
+		await self.boy.say('Here ya go: http://imgur.com/a/cOzff')
 
 def setup(bot):
 	bot.add_cog(Ships(bot))
