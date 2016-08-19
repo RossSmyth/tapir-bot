@@ -29,6 +29,11 @@ class Ships:
 	async def javelin(self):
 		"""The Javelin Destroyer Capital ship"""
 		await self.bot.say('Here ya go: http://imgur.com/a/LWViV')
+		
+	@ship.command(pass_context=True)
+	async def merlin(self):
+		"""The Merlin snub"""
+		await self.bot.say('Here ya go: http://imgur.com/a/5Tsrd')
 
 def setup(bot):
 	bot.add_cog(Ships(bot))
