@@ -44,6 +44,11 @@ class Ships:
 	async def endeavor(self):
 		"""The Endeavor science vessel"""
 		await self.boy.say('Here ya go: http://imgur.com/a/iYzOu')
+		
+	@ship.command(pass_context=True)
+	async def blade(self):
+		"""The Vanduul Blade fighter"""
+		await self.boy.say('Here ya go: http://imgur.com/a/UviA5')
 
 def setup(bot):
 	bot.add_cog(Ships(bot))
