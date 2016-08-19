@@ -54,6 +54,11 @@ class Ships:
 	async def gladius(self):
 		"""The Gladius light fighter"""
 		await self.boy.say('Here ya go: http://imgur.com/a/Xinmf')
+		
+	@ship.command(pass_context=True)
+	async def herald(self):
+		"""The Herald info runner"""
+		await self.boy.say('Here ya go: http://imgur.com/a/iqtmw')
 
 def setup(bot):
 	bot.add_cog(Ships(bot))
