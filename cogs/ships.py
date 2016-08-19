@@ -71,7 +71,7 @@ class Ships:
 		await self.boy.say('Here ya go: http://imgur.com/a/jEiYX')
 		
 	@ship.command(pass_context=True)
-	async def 85X(self):
+	async def jump_snub(self):
 		"""The 890's snub, the 85X"""
 		await self.boy.say('Here ya go: http://imgur.com/a/cOzff')
 
