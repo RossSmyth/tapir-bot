@@ -9,12 +9,12 @@ class Tapir:
     
     def __init__(self, bot):
         self.bot = bot
+		self.config = config.Config('tapirs.json', loop=bot.loop)
         
     @commands.command()
     async def tapir(self):
         """The wonderful tapir command that outputs a random tapir"""
-        tapir_file = config.Config('tapirs.json')
-        tapirs = tapir_file.get('tapirs')
+        tapirs = self.config.get('tapirs', [])
         tapir = tapirs[random.randrange(len(tapirs))]
         await self.bot.say(tapir)
 
@@ -22,10 +22,9 @@ class Tapir:
     @checks.is_owner()
     async def save_tapir(self, *, tapir):
         """allows the saving of a tapirs"""
-        tapir_file = config.Config('tapirs.json')
-        tapirs = tapir_file.get('tapirs')
+        tapirs = self.config.get('tapirs', [])
         tapirs.append(tapir)
-        tapir_file.put(tapirs)
+        tapir_file.put('tapirs', tapirs)
         self.bot.say('\N{OK HAND SIGN}')
         
 def setup(bot):
