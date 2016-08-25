@@ -9,7 +9,7 @@ class Tapir:
     
     def __init__(self, bot):
         self.bot = bot
-		self.config = config.Config('tapirs.json', loop=bot.loop)
+        self.config = config.Config('tapirs.json', loop=bot.loop)
         
     @commands.command()
     async def tapir(self):
@@ -24,8 +24,8 @@ class Tapir:
         """allows the saving of a tapirs"""
         tapirs = self.config.get('tapirs', [])
         tapirs.append(tapir)
-        tapir_file.put('tapirs', tapirs)
-        self.bot.say('\N{OK HAND SIGN}')
+        await self.config.put('tapirs', tapirs)
+        await self.bot.say('\N{OK HAND SIGN}')
         
 def setup(bot):
     bot.add_cog(Tapir(bot))
