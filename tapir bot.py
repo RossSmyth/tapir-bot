@@ -76,7 +76,7 @@ async def on_command(command, ctx):
 @bot.event
 async def on_message(message):
     """Some message checking stuff"""
-    """The tapir emoji"""
+
     if message.author == bot.user:
         return
 
