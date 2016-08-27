@@ -16,7 +16,7 @@ class Mod:
         return message.server.me if message.channel.is_private else self.bot.user
 
     @commands.group(pass_context=True, no_pm=True, hidden=True)
-    @checks.admin_or_permissions(manage_channels=True)
+    @checks.owner()
     async def ignore(self, ctx):
         """Handles the bot's ignore lists.
         To use these commands, you must have the Bot Admin role or have
@@ -65,7 +65,7 @@ class Mod:
         await self.bot.say('\U0001f44c')
         
     @ignore.command(name='all', pass_context=True, hidden=True)
-    @checks.admin_or_permissions(manage_server=True)
+    @checks.owner()
     async def _all(self, ctx):
         """Ignores every channel in the server from being processed.
         This works by adding every channel that the server currently has into
@@ -82,7 +82,7 @@ class Mod:
         await self.bot.say('\U0001f44c')
         
     @commands.command(pass_context=True, no_pm=True, hidden=True)
-    @checks.admin_or_permissions(manage_channels=True)
+    @checks.owner()
     async def unignore(self, ctx, *, channel : discord.Channel = None):
         """Unignores a specific channel from being processed.
         If no channel is specified, it unignores the current channel.
@@ -104,7 +104,7 @@ class Mod:
             await self.bot.say('\U0001f44c')
             
     @commands.command(no_pm=True, hidden=True)
-    @checks.admin_or_permissions(manage_server=True)
+    @checks.owner()
     async def plonk(self, *, member : discord.Member):
         """Bans a user from using the bot.
         Note that this ban is **global**. So they are banned from
@@ -127,7 +127,7 @@ class Mod:
         await self.bot.say('{0.name} has been banned from using the bot.'.format(member))
         
     @commands.command(no_pm=True, hidden=True)
-    @checks.admin_or_permissions(manage_server=True)
+    @checks.owner()
     async def unplonk(self, *, member : discord.Member):
         """Unbans a user from using the bot.
         To use this command you must have the Manage Server permission
