@@ -24,7 +24,7 @@ class Meta:
         """displays link to github"""
         await self.bot.say('Github: https://github.com/treefroog/tapir-bot')
         
-    @commands.command(rest_is_raw=True, hidden=True, aliases=['say'])
+    @commands.command(hidden=True, aliases=['say'])
     @checks.is_owner()
     async def echo(self, *, content):
         """says stuff that I tell it to"""
