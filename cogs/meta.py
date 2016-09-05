@@ -35,7 +35,15 @@ class Meta:
     async def _quit(self):
         """quits tapir-bot"""
         await self.bot.logout()
-        
+    	
+    @commands.command(aliases=['rip'], hidden=True)
+    @checks.is_owner()
+    async def kill(self):
+        """Kills tapir-bot violently"""
+        await self.bot.say("See you in hell <@149281074437029890> :middle_finger:")
+        await asyncio.sleep(3)
+        await self.bot.logout()
+
     @commands.command(hidden=True)
     @checks.is_owner()
     async def commandstats(self):
