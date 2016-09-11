@@ -13,6 +13,7 @@ class Ships:
 	@commands.command()
 	async def ship(self, *, ship_name):
 		"""Say ship and a ship's name to see an album of that ship!"""
+		ship_name = ship_name.lower()
 		try:
 			ship_album = self.config.get(ship_name, "")
 			await self.bot.say(ship_album)
