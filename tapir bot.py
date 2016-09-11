@@ -78,6 +78,11 @@ async def on_message(message):
     """Some message checking stuff"""
     if message.author.bot:
         return
+    
+    #Lowers the command for insensitive case
+    content_list = message.content.split(" ")
+    content_list[0] = content_list[0].lower()
+    message.content = " ".join(content_list)
 
     await bot.process_commands(message)
 
