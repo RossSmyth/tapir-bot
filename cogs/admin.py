@@ -47,7 +47,7 @@ class Admin:
         else:
             await self.bot.say('\N{OK HAND SIGN}')
             
-    @commands.command(pass_context=True, hidden=True)
+    @commands.command(pass_context=True, hidden=True, aliases=['execute'])
     @checks.is_owner()
     async def debug(self, ctx, *, code : str):
         """Evaluates code."""
