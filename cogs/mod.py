@@ -15,30 +15,30 @@ class Mod:
     def bot_user(self, message):
         return message.server.me if message.channel.is_private else self.bot.user
 		
-	    def __check(self, ctx):
-        msg = ctx.message
-        if checks.is_owner_check(msg):
+        def __check(self, ctx):
+            msg = ctx.message
+            if checks.is_owner_check(msg):
+                return True
+
+            # user is bot banned
+            if msg.author.id in self.config.get('plonks', []):
+                return False
+
+            # check if the channel is ignored
+            # but first, resolve their permissions
+
+            perms = msg.channel.permissions_for(msg.author)
+            bypass_ignore = perms.administrator
+
+            # now we can finally realise if we can actually bypass the ignore.
+
+            if not bypass_ignore and msg.channel.id in self.config.get('ignored', []):
+                return False
+
             return True
 
-        # user is bot banned
-        if msg.author.id in self.config.get('plonks', []):
-            return False
-
-        # check if the channel is ignored
-        # but first, resolve their permissions
-
-        perms = msg.channel.permissions_for(msg.author)
-        bypass_ignore = perms.administrator
-
-        # now we can finally realise if we can actually bypass the ignore.
-
-        if not bypass_ignore and msg.channel.id in self.config.get('ignored', []):
-            return False
-
-        return True
-
     @commands.group(pass_context=True, no_pm=True, hidden=True)
-    @checks.owner()
+    @checks.is_owner()
     async def ignore(self, ctx):
         """Handles the bot's ignore lists.
         To use these commands, you must have the Bot Admin role or have
@@ -87,7 +87,7 @@ class Mod:
         await self.bot.say('\U0001f44c')
         
     @ignore.command(name='all', pass_context=True, hidden=True)
-    @checks.owner()
+    @checks.is_owner()
     async def _all(self, ctx):
         """Ignores every channel in the server from being processed.
         This works by adding every channel that the server currently has into
@@ -104,7 +104,7 @@ class Mod:
         await self.bot.say('\U0001f44c')
         
     @commands.command(pass_context=True, no_pm=True, hidden=True)
-    @checks.owner()
+    @checks.is_owner()
     async def unignore(self, ctx, *, channel : discord.Channel = None):
         """Unignores a specific channel from being processed.
         If no channel is specified, it unignores the current channel.
@@ -126,7 +126,7 @@ class Mod:
             await self.bot.say('\U0001f44c')
             
     @commands.command(no_pm=True, hidden=True)
-    @checks.owner()
+    @checks.is_owner()
     async def plonk(self, *, member : discord.Member):
         """Bans a user from using the bot.
         Note that this ban is **global**. So they are banned from
@@ -149,7 +149,7 @@ class Mod:
         await self.bot.say('{0.name} has been banned from using the bot.'.format(member))
         
     @commands.command(no_pm=True, hidden=True)
-    @checks.owner()
+    @checks.is_owner()
     async def unplonk(self, *, member : discord.Member):
         """Unbans a user from using the bot.
         To use this command you must have the Manage Server permission
