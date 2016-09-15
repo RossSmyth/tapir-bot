@@ -51,6 +51,14 @@ class Meta:
         msg = 'Since startup, {} commands have been used.\n{}'
         counter = self.bot.commands_used
         await self.bot.say(msg.format(sum(counter.values()), counter))
+    	
+    @commands.command()
+    async def oauth(self):
+        """Gives a link to invite to a server
         
+        Gives it all permissions as well if you don't uncheck them"""
+        oauth_url = discord.utils.oauth_url(self.bot.client_id, discord.Permissions.all())
+        await self.bot.say(oauth_url, delete_after = 120)
+
 def setup(bot):
     bot.add_cog(Meta(bot))
