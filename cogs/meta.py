@@ -44,6 +44,36 @@ class Meta:
         await asyncio.sleep(3)
         await self.bot.logout()
 
+    async def say_permissions(self, member, channel):
+        permissions = channel.permissions_for(member)
+        entries = [(attr.replace('_', ' ').title(), val) for attr, val in permissions]
+        await formats.entry_to_code(self.bot, entries)
+
+    @commands.command(pass_context=True, no_pm=True)
+    async def permissions(self, ctx, *, member : discord.Member = None):
+        """Shows a member's permissions.
+        You cannot use this in private messages. If no member is given then
+        the info returned will be yours.
+        """
+        channel = ctx.message.channel
+        if member is None:
+            member = ctx.message.author
+
+        await self.say_permissions(member, channel)
+
+    @commands.command(pass_context=True, no_pm=True)
+    @checks.admin_or_permissions(manage_roles=True)
+    async def botpermissions(self, ctx):
+        """Shows the bot's permissions.
+        This is a good way of checking if the bot has the permissions needed
+        to execute the commands it wants to execute.
+        To execute this command you must have Manage Roles permissions or
+        have the Bot Admin role. You cannot use this in private messages.
+        """
+        channel = ctx.message.channel
+        member = ctx.message.server.me
+        await self.say_permissions(member, channel)
+
     @commands.command(hidden=True)
     @checks.is_owner()
     async def commandstats(self):
