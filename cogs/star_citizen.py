@@ -34,7 +34,7 @@ class Star_Citizen:
             soup = BeautifulSoup(doc, 'html.parser')
         digit_divs = soup.find_all(class_="csvg-digit-number")
         weeks = digit_divs[0].text
-        days = int(digit_divs[1].text) - 14
+        days = int(digit_divs[1].text) - 7
         hours = digit_divs[2].text
         minutes = digit_divs[3].text
         seconds = digit_divs[4].text
