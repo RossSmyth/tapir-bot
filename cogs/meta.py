@@ -2,7 +2,7 @@ from discord.ext import commands
 from .utils import checks, formats
 import discord
 from collections import OrderedDict, deque, Counter
-import os, datetime
+import datetime
 import re, asyncio
 import copy
 
@@ -81,7 +81,26 @@ class Meta:
         msg = 'Since startup, {} commands have been used.\n{}'
         counter = self.bot.commands_used
         await self.bot.say(msg.format(sum(counter.values()), counter))
-    	
+
+
+    def get_bot_uptime(self):
+        now = datetime.datetime.utcnow()
+        delta = now - self.bot.uptime
+        hours, remainder = divmod(int(delta.total_seconds()), 3600)
+        minutes, seconds = divmod(remainder, 60)
+        days, hours = divmod(hours, 24)
+        if days:
+            fmt = '{d} days, {h} hours, {m} minutes, and {s} seconds'
+        else:
+            fmt = '{h} hours, {m} minutes, and {s} seconds'
+
+        return fmt.format(d=days, h=hours, m=minutes, s=seconds)
+
+    @commands.command()
+    async def uptime(self):
+        """Tells you how long the bot has been up for."""
+        await self.bot.say('Uptime: **{}**'.format(self.get_bot_uptime()))
+    
     @commands.command()
     async def oauth(self):
         """Gives a link to invite to a server
