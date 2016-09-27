@@ -4,6 +4,7 @@ import discord
 import asyncio
 from bs4 import BeautifulSoup
 import urllib.request
+import datetime
 
 class Star_Citizen:
     """All of the Star Citizen related commands"""
@@ -29,18 +30,15 @@ class Star_Citizen:
     @commands.command()
     async def countdown(self):
         """Countdown to Citizencon \N{SMILE}"""
-        url = 'http://www.timeanddate.com/countdown/launch?iso=20161009T00&p0=835&msg=Citizen+Con&ud=1&font=cursive&csz=1'
-        with urllib.request.urlopen(url) as doc:
-            soup = BeautifulSoup(doc, 'html.parser')
-        digit_divs = soup.find_all(class_="csvg-digit-number")
-        weeks = digit_divs[0].text
-        days = int(digit_divs[1].text) - 7
-        hours = digit_divs[2].text
-        minutes = digit_divs[3].text
-        seconds = digit_divs[4].text
-        countdown = 'Citizencon is in:\n`{} Weeks, {} Days, {} Hours, {} Minutes, {} Seconds`'
-        countdown = countdown.format(weeks, days, hours, minutes, seconds)
-        await self.bot.say(countdown)
+        utc_now = datetime.datetime.utcnow()
+        citizencon_utc = datetime.datetime.utcfromtimestamp(1476050400)
+        time_delta = citizencon_utc - utc_now
+        hours = time_delta.seconds // 3600
+        minutes = (time_delta.seconds % 3600) // 60
+        seconds = time_delta.seconds % 60
+        citizencon_countdown = 'Citizencon is in:\n`{} Days, {} Hours, {} Minutes, {} Seconds`'
+        citizencon_countdown = citizencon_countdown.format(time_delta.days, hours, minutes, seconds)
+        await self.bot.say(citizencon_countdown)
         
 def setup(bot):
     bot.add_cog(Star_Citizen(bot))
