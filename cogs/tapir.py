@@ -15,8 +15,11 @@ class Tapir:
     async def tapir(self):
         """The wonderful tapir command that outputs a random tapir"""
         tapir_list = self.config.get('tapirs', [])
-        tapir = tapirs[random.randrange(len(tapir_list))]
-        await self.bot.say(tapir)
+        tapir = tapir_list[random.randrange(len(tapir_list))]
+        try:
+            await self.bot.say(tapir)
+        except:
+            await self.bot.whisper(tapir)
 
     @commands.command(hidden=True)
     @checks.is_owner()
