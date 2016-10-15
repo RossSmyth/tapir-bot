@@ -2,9 +2,6 @@ from discord.ext import commands
 from .utils import checks
 import discord
 import asyncio
-from bs4 import BeautifulSoup
-import urllib.request
-import datetime
 
 class Star_Citizen:
     """All of the Star Citizen related commands"""
