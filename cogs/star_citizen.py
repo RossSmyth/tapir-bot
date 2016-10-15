@@ -26,19 +26,6 @@ class Star_Citizen:
     async def two_four(self):
         """Shows the progress of 2.4"""
         await self.bot.say('It\'s not just a meme! http://i.imgur.com/umBUjqW.gif')
-
-    @commands.command()
-    async def countdown(self):
-        """Countdown to Citizencon \N{SMILE}"""
-        utc_now = datetime.datetime.utcnow()
-        citizencon_utc = datetime.datetime.utcfromtimestamp(1476050400)
-        time_delta = citizencon_utc - utc_now
-        hours = time_delta.seconds // 3600
-        minutes = (time_delta.seconds % 3600) // 60
-        seconds = time_delta.seconds % 60
-        citizencon_countdown = 'Citizencon is in:\n`{} Days, {} Hours, {} Minutes, {} Seconds`'
-        citizencon_countdown = citizencon_countdown.format(time_delta.days, hours, minutes, seconds)
-        await self.bot.say(citizencon_countdown)
         
 def setup(bot):
     bot.add_cog(Star_Citizen(bot))
