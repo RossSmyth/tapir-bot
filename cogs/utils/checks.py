@@ -9,6 +9,14 @@ def is_owner():
     """is me but a decorator"""
     return commands.check(lambda ctx: is_owner_check(ctx.message))
 
+def is_user_check(message, user_id):
+    """Is is a user?"""
+    return message.author.id == user_id
+	
+def is_user(user_id):
+    """Is user but decorator"""
+    return commands.check(lambda ctx: is_azwe_check(ctx.message, user_id))
+
 """
 There is now a permissions system!
 if you don't meet a permission to do a command, nothing really happens
