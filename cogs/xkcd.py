@@ -20,7 +20,7 @@ class XKCD:
         hidden = 'alt'
         image = 'img'
         
-        template = '```Date: {} \nNumber: {} \nTitle: {} \nHover Text: {} \n```{}'
+        template = '```Date: {} \nNumber: {} \nTitle: {} \nTooltip Text: {} \n```{}'
         
         day = data[day]
         month = data[month]
