@@ -15,7 +15,7 @@ def is_user_check(message, user_id):
 	
 def is_user(user_id):
     """Is user but decorator"""
-    return commands.check(lambda ctx: is_azwe_check(ctx.message, user_id))
+    return commands.check(lambda ctx: is_user_check(ctx.message, user_id))
 
 """
 There is now a permissions system!

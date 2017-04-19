@@ -18,11 +18,11 @@ class Misc:
     async def bartti(self):
         """Hacked picture of Bartti"""
         await self.bot.say('Bartti: http://i.imgur.com/kw5is3L.png')
-		
-	@commands.command()
-	async def waffle(self):
-		"""Azwe's idea"""
-		await self.bot.say('Waffles are for tapirs')
+        
+    @commands.command()
+    async def waffle(self):
+        """Azwe's idea"""
+        await self.bot.say('Waffles are for tapirs')
         
 def setup(bot):
     bot.add_cog(Misc(bot))
