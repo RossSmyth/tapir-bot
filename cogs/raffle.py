@@ -11,6 +11,7 @@ class Raffle:
         self.config = config.Config('raffle.json', loop=bot.loop)
     
     @commands.command(pass_context=True, no_pm=True)
+    @checks.is_in_servers('120318148095246336')
     async def raffle(self, ctx):
         raffle = self.config.get('raffle', [])
         person = ctx.message.author.id
@@ -33,6 +34,7 @@ class Raffle:
         self.bot.unload_extension('cogs.raffle')
         
     @commands.command(no_pm=True)
+    @checks.is_in_servers('120318148095246336')
     async def count(self):
         raffle = self.config.get('raffle', [])
         length = len(raffle)
