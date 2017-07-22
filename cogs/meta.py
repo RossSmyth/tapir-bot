@@ -17,7 +17,7 @@ class Meta:
     @commands.command()
     async def hello(self):
         """Displays my hello message."""
-        await self.bot.say('Hello! I\'m a bot made by <@104389378201104384>')
+        await self.bot.say('Hello! I\'m a bot made by <@149281074437029890>')
         
     @commands.command()
     async def source(self):

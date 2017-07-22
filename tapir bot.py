@@ -10,7 +10,7 @@ import sys
 from collections import Counter
 
 description = """
-I am a bot written by treefroog (not treefr👀g) to provide tapirs! \n \nThis is a list of cogs along with their associated commands:
+I am a bot written by treefroog to provide tapirs! \n \nThis is a list of cogs along with their associated commands:
 """
 
 initial_extensions = [
