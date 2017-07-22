@@ -26,7 +26,9 @@ class Meta:
 
     @commands.command()
     async def invite(self):
-        """Invite to tapir-bot's official server. For additional help"""
+        """Invite to tapir-bot's official server.
+        Coulld be for suggestions or help. Whatever you want.
+		"""
         await self.bot.whisper('Here ya go: \ndiscord.gg/JzzSxb5')
         
     @commands.command(hidden=True, aliases=['say'])
