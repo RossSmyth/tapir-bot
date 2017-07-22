@@ -23,6 +23,11 @@ class Meta:
     async def source(self):
         """displays link to github"""
         await self.bot.say('Github: https://github.com/treefroog/tapir-bot')
+
+    @commands.command()
+	async def invite(self):
+		"""Invite to tapir-bot's official server. For additional help"""
+		await self.bot.whisper('Here ya go: \ndiscord.gg/JzzSxb5')
         
     @commands.command(hidden=True, aliases=['say'])
     @checks.is_owner()
