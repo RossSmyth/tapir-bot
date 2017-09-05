@@ -52,7 +52,7 @@ async def on_command_error(error, ctx):
 @bot.event
 async def on_ready():
     """what happens when tapir-bot connects to the discord api"""
-    await bot.change_status(game=discord.Game(name='Say `!halp` for help!'))
+    await bot.change_presence(game=discord.Game(name='Say !halp for help!'))
     print('Logged in as:')
     print('Username: ' + bot.user.name)
     print('ID: ' + bot.user.id)

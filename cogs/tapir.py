@@ -11,7 +11,7 @@ class Tapir:
         self.bot = bot
         self.config = config.Config('tapirs.json', loop=bot.loop)
         
-    @commands.command()
+    @commands.command(cooldown=5)
     async def tapir(self):
         """The wonderful tapir command that outputs a random tapir"""
         tapir_list = self.config.get('tapirs', [])
