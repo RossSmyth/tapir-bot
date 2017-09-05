@@ -56,9 +56,6 @@ async def on_ready():
     print('Logged in as:')
     print('Username: ' + bot.user.name)
     print('ID: ' + bot.user.id)
-    for s in bot.servers:
-        print(s.name)
-    print('----------')
     if not hasattr(bot, 'uptime'):
         bot.uptime = datetime.datetime.utcnow()
         
