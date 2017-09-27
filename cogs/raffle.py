@@ -19,7 +19,7 @@ class Raffle:
             return
             
     @raffle.command(pass_context=True)
-    async def start(self, ctx)
+    async def start(self, ctx):
         """Starts a raffle in a channel"""
         raffles = self.config.get('raffles', {})
         
