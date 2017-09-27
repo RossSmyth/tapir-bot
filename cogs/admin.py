@@ -46,12 +46,6 @@ class Admin:
             await self.bot.say('{}: {}'.format(type(e).__name__, e))
         else:
             await self.bot.say('\N{OK HAND SIGN}')
-
-    @commands.command(no_pm=True)
-    @checks.is_user('118907180761088006')
-    async def start(self):
-        self.bot.load_extension('cogs.raffle')
-        await self.bot.say('Raffle you nerds!')
             
     @commands.command(pass_context=True, hidden=True, aliases=['execute'])
     @checks.is_owner()
