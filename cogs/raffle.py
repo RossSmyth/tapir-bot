@@ -37,7 +37,7 @@ class Raffle:
         if ctx.message.channel.id in raffles:
             raffle = raffles[ctx.message.channel.id][1]
 
-            if ctx.author.id in raffle:
+            if ctx.message.author.id in raffle:
                 await self.bot.say('<@{}> You are already entered dummy'.format(ctx.message.author.id))
             else:
                 raffle.append(ctx.message.author.id)
@@ -46,7 +46,7 @@ class Raffle:
                 await self.bot.say("<@{}> You're entered!".format(ctx.message.author.id))
         else:
             return
-    
+
     @raffle.command(pass_context=True)
     async def draw(self, ctx):
         """Draws a raffle in a channel"""
@@ -55,7 +55,7 @@ class Raffle:
         if ctx.message.channel.id in raffles:
             raffle = raffles[ctx.message.channel.id]
             
-            if ctx.author.id == raffle[0]:
+            if ctx.message.author.id == raffle[0]:
                 winner = raffle[1][random.randrange(len(raffle))]
                 await self.bot.say('Congratulations <@{}>, You won!'.format(winner))
                 raffles.pop(ctx.message.channel.id)
