@@ -46,6 +46,7 @@ class TapirBot(commands.Bot):
                 traceback.print_exc()
 
     async def on_command_error(self, ctx, error):
+        """Some miscellaneous command handlers"""
         if isinstance(error, commands.NoPrivateMessage):
             await ctx.author.send(
                 'This command cannot be used in private messages.')

@@ -7,6 +7,7 @@ from tapirbot import TapirBot
 
 @contextlib.contextmanager
 def setup_logging():
+    """Context manager makes things much cleaner"""
     try:
         # Basically __enter__
         logging.getLogger('discord').setLevel(logging.INFO)
@@ -32,6 +33,7 @@ def setup_logging():
 
 
 def run_bot():
+    """The function that actually runs the bot"""
     loop = asyncio.get_event_loop()
     log = logging.getLogger()
 
@@ -42,6 +44,7 @@ def run_bot():
     bot.run()
 
 if __name__ == '__main__ ':
+    """Starting the bot when this file is ran"""
     loop = asyncio.get_event_loop()
     with setup_logging():
         run_bot()

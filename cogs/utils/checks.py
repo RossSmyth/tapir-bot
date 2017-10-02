@@ -1,75 +1,89 @@
 from discord.ext import commands
-import discord.utils
-
-def is_owner_check(message):
-    """"is it me?"""
-    return message.author.id == '149281074437029890'
-
-def is_owner():
-    """is me but a decorator"""
-    return commands.check(lambda ctx: is_owner_check(ctx.message))
-
-def is_user_check(message, user_id):
-    """Is is a user?"""
-    return message.author.id == user_id
-	
-def is_user(user_id):
-    """Is user but decorator"""
-    return commands.check(lambda ctx: is_user_check(ctx.message, user_id))
 
 """
-There is now a permissions system!
-if you don't meet a permission to do a command, nothing really happens
-but if you are the owner or a so called bot admin or a server admin or
-if you are the owner (treefroog) you can do any command
+if you don't meet a permission to do a command, nothing really happens.
+If you are the bot owner, you can run any command, anywhere, anytime.
 "'it just works'
 -todd howard"
 -micheal scott
 """
 
-def check_permissions(ctx, perms):
-    """does some permission checking. I can do anything"""
-    msg = ctx.message
-    if is_owner_check(msg):
+
+async def check_permissions(ctx, perms, *, check=all):
+    """does some permission checking"""
+    is_owner = await ctx.bot.is_owner(ctx.author)
+    if is_owner:
         return True
 
-    ch = msg.channel
-    author = msg.author
-    resolved = ch.permissions_for(author)
-    return all(getattr(resolved, name, None) == value for name, value in perms.items())
-    
-def role_or_permissions(ctx, check, **perms):
-    """checks roles or permissions, since roles can do some stuff"""
-    if check_permissions(ctx, perms):
+    resolved = ctx.permissions_for(ctx.author)
+    return check(getattr(resolved, name, None) == value for name, value
+                 in perms.items())
+
+
+def has_permissions(*, check=all, **perms):
+    """Command decorator for checking permissions"""
+    async def pred(ctx):
+        return await check_permissions(ctx, perms, check=check)
+    return commands.check(pred)
+
+async def check_guild_permissions(ctx, perms, *, check=all):
+    """Checks for permissions in a specific guild"""
+    is_owner = await ctx.bot.is_owner(ctx.author)
+    if is_owner:
         return True
 
-    ch = ctx.message.channel
-    author = ctx.message.author
-    if ch.is_private:
-        return False # can't have roles in PMs
+    if ctx.guild is None:
+        return False
 
-    role = discord.utils.find(check, author.roles)
-    return role is not None
-    
+    resolved = ctx.author.guild_permissions
+    return check(getattr(resolved, name, None) == value for name, value
+                 in perms.items())
+
+
+def has_guild_permissions(*, check=all, **perms):
+    """Command decorator for checking guild permissions"""
+    async def pred(ctx):
+        return await check_guild_permissions(ctx, perms, check=check)
+    return commands.check(pred)
+
+
+# The following decorators do not account for channel overwrites
+def is_mod():
+    """Command decorator for checking for moderator permissions"""
+    async def pred(ctx):
+        return await check_guild_permissions(ctx, {'manage_guild': True})
+    return commands.check(pred)
+
+
+def is_admin():
+    """Command decorator for checking for admin permissions"""
+    async def pred(ctx):
+        return await check_guild_permissions(ctx, {'administrator': True})
+    return commands.check(pred)
+
+
 def mod_or_permissions(**perms):
-    """checks if mod, or permissions to do stuff"""
-    def predicate(ctx):
-        return role_or_permissions(ctx, lambda r: r.name in ('Bot Mod', 'Bot Admin'), **perms)
-
+    """Command decorator for checking for moderator or other permissions"""
+    perms['manage_guild'] = True
+    async def predicate(ctx):
+        return await check_guild_permissions(ctx, perms, check=any)
     return commands.check(predicate)
-    
+
+
 def admin_or_permissions(**perms):
-    """checks if admin, or if permission allows to do stuff"""
-    def predicate(ctx):
-        return role_or_permissions(ctx, lambda r: r.name == 'Bot Admin', **perms)
+    """Command decorator for checking for admin or other permissions"""
+    perms['administrator'] = True
+    async def predicate(ctx):
+        return await check_guild_permissions(ctx, perms, check=any)
+    return commands.check(predicate)
 
-    return commands.check(predicate)
-    
-def is_in_servers(*server_ids):
-    """if is in server"""
+
+def is_in_guilds(*guild_ids):
+    """Command decorator for if the command is in a specific guild"""
     def predicate(ctx):
-        server = ctx.message.server
-        if server is None:
+        guild = ctx.guild
+        if guild is None:
             return False
-        return server.id in server_ids
+        return guild.id in guild_ids
     return commands.check(predicate)
+
