@@ -30,6 +30,7 @@ def setup_logging():
             hdlr.close()
             log.removeHandler(hdlr)
 
+
 def run_bot():
     loop = asyncio.get_event_loop()
     log = logging.getLogger()
