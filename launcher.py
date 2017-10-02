@@ -8,7 +8,7 @@ from tapirbot import TapirBot
 @contextlib.contextmanager
 def setup_logging():
     try:
-        # __enter__
+        # Basically __enter__
         logging.getLogger('discord').setLevel(logging.INFO)
         logging.getLogger('discord.http').setLevel(logging.WARNING)
 
@@ -24,7 +24,7 @@ def setup_logging():
 
         yield
     finally:
-        # __exit__
+        # Basically __exit__
         handlers = log.handlers[:]
         for hdlr in handlers:
             hdlr.close()
