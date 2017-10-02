@@ -37,3 +37,10 @@ def run_bot():
     # Should probably put some stuff here later for the database
 
     bot = TapirBot()
+    # More database stuff here probably
+    bot.run()
+
+if __name__ == '__main__ ':
+    loop = asyncio.get_event_loop()
+    with setup_logging():
+        run_bot()
