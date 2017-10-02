@@ -1,16 +1,15 @@
-from discord.ext import commands
-import discord
-from cogs.utils import checks
-import datetime, re
-import json, asyncio
-import copy
+import datetime
 import logging
-import traceback
 import sys
-from collections import Counter
+import traceback
+
+import aiohttp
+from discord.ext import commands
+
+import config
 
 description = """
-I am a bot written by treefroog to provide tapirs! \n \nThis is a list of cogs along with their associated commands:
+I am a bot written by treefroog to provide tapirs!
 """
 
 initial_extensions = [
@@ -25,86 +24,69 @@ initial_extensions = [
     'cogs.misc'
     ]
 
-discord_logger = logging.getLogger('discord')
-discord_logger.setLevel(logging.CRITICAL)
-log = logging.getLogger()
-log.setLevel(logging.INFO)
-handler = logging.FileHandler(filename='tapir-bot.log', encoding='utf-8', mode='r+')
-log.addHandler(handler)
+discord_logger = logging.getLogger(__name__)
 
-help_attrs = dict(hidden=True, name='halp')
 
-bot = commands.Bot(command_prefix=['!'], description=description, pm_help=None, help_attrs=help_attrs)
+class TapirBot(commands.Bot):
+    def __init__(self):
+        super().__init__(command_prefix=['!'],
+                         description=description,
+                         pm_help=None,
+                         help_attrs=dict(hidden=True, name='halp'))
 
-@bot.event
-async def on_command_error(error, ctx):
-    """some custom error stuff"""
-    if isinstance(error, commands.NoPrivateMessage):
-        await bot.send_message(ctx.message.author, 'This command cannot be used in private messages.')
-    elif isinstance(error, commands.DisabledCommand):
-        await bot.send_message(ctx.message.author, 'Sorry. This command is disabled and cannot be used.')
-    elif isinstance(error, commands.CommandInvokeError):
-        print('In {0.command.qualified_name}:'.format(ctx), file=sys.stderr)
-        traceback.print_tb(error.original.__traceback__)
-        print('{0.__class__.__name__}: {0}'.format(error.original), file=sys.stderr)
-        
-        
-@bot.event
-async def on_ready():
-    """what happens when tapir-bot connects to the discord api"""
-    await bot.change_presence(game=discord.Game(name='Say !halp for help!'))
-    print('Logged in as:')
-    print('Username: ' + bot.user.name)
-    print('ID: ' + bot.user.id)
-    if not hasattr(bot, 'uptime'):
-        bot.uptime = datetime.datetime.utcnow()
-        
-@bot.event
-async def on_command(command, ctx):
-    """when a command happens it logs it"""
-    bot.commands_used[command.name] += 1
-    message = ctx.message
-    destination = None
-    if message.channel.is_private:
-        destination = 'Private Message'
-    else:
-        destination = '#{0.channel.name} ({0.server.name})'.format(message)
+        self.client_id = config.client_id
+        self.bots_key = config.bots_key
+        self.session = aiohttp.ClientSession(loop=self.loop)
 
-    log.info('{0.timestamp}: {0.author.name} in {1}: {0.content}'.format(message, destination))
+        for extension in initial_extensions:
+            try:
+                self.load_extension(extension)
+            except:
+                print(f'Failed to load extension {extension}.', file=sys.stderr)
+                traceback.print_exc()
 
-@bot.event
-async def on_message(message):
-    """Some message checking stuff"""
-    if message.author.bot:
-        return
-    
-    #Lowers the command for insensitive case
-    content_list = message.content.split(" ")
-    content_list[0] = content_list[0].lower()
-    message.content = " ".join(content_list)
+    async def on_command_error(self, ctx, error):
+        if isinstance(error, commands.NoPrivateMessage):
+            await ctx.author.send(
+                'This command cannot be used in private messages.')
+        elif isinstance(error, commands.DisabledCommand):
+            await ctx.author.send(
+                'Sorry. This command is disabled and cannot be used.')
+        elif isinstance(error, commands.CommandInvokeError):
+            print(f'In {ctx.command.qualified_name}:', file=sys.stderr)
+            traceback.print_tb(error.original.__traceback__)
+            print(f'{error.original.__class__.__name__}: {error.original}',
+                  file=sys.stderr)
 
-    await bot.process_commands(message)
+    async def on_ready(self):
+        """Makes sure there is an uptime attribute"""
+        if not hasattr(self, 'uptime'):
+            self.uptime = datetime.datetime.utcnow()
 
-def load_credentials():
-    """loads the credentials file with important stuff in it"""
-    with open('credentials.json') as f:
-        return json.load(f)
-        
-if __name__ == '__main__':
-    if any('debug' in arg.lower() for arg in sys.argv):
-        bot.command_prefix = '!'
+        print(f'Ready: {self.user} (ID: {self.user.id}')
 
-    credentials = load_credentials()
-    bot.client_id = credentials['client_id']
-    bot.commands_used = Counter()
-    for extension in initial_extensions:
-        try:
-            bot.load_extension(extension)
-        except Exception as e:
-            print('Failed to load extension {}\n{}: {}'.format(extension, type(e).__name__, e))
+    async def on_message(self, message):
+        """Some message checking stuff"""
 
-    bot.run(credentials['token'])
-    handlers = log.handlers[:]
-    for hdlr in handlers:
-        hdlr.close()
-        log.removeHandler(hdlr)
+        # Lowers the command for insensitive case
+        content_list = message.content.split(" ")
+        content_list[0] = content_list[0].lower()
+        message.content = " ".join(content_list)
+
+        if message.author.bot:
+            return
+
+        await self.process_commands(message)
+
+    async def close(self):
+        """Closes all connections cleanly"""
+        await super().close()
+        await self.session.close()
+
+    def run(self):
+        """Passes the secret token to the run method"""
+        super().run(config.token, reconnect=True)
+
+    @property
+    def config(self):
+        return __import__('config')
