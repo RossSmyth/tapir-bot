@@ -22,7 +22,8 @@ initial_extensions = [
     'cogs.star_citizen',
     'cogs.xkcd',
     'cogs.repl',
-    'cogs.misc'
+    'cogs.misc',
+    'cogs.raffle'
     ]
 
 discord_logger = logging.getLogger('discord')
