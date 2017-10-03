@@ -15,6 +15,11 @@ class Raffle:
         """Can create raffles within a specific channel"""
         
         if ctx.invoked_subcommand is None:
+            raffles = self.config.get('raffles', {})
+        
+            if ctx.message.channel.id in raffles:
+                await self.bot.say('You probably meant to say ```!raffle enter``` instead')
+        else:
             return
             
     @raffle.command(pass_context=True)
