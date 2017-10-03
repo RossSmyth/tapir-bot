@@ -48,8 +48,8 @@ class TapirBot(commands.Bot):
     async def on_command_error(self, ctx, error):
         """Some miscellaneous command handlers"""
         if isinstance(error, commands.NoPrivateMessage):
-            await ctx.author.send(
-                'This command cannot be used in private messages.')
+            await ctx.author.send('This command cannot be used in private '
+                                  'messages.')
         elif isinstance(error, commands.DisabledCommand):
             await ctx.author.send(
                 'Sorry. This command is disabled and cannot be used.')
@@ -87,7 +87,3 @@ class TapirBot(commands.Bot):
     def run(self):
         """Passes the secret token to the run method"""
         super().run(config.token, reconnect=True)
-
-    @property
-    def config(self):
-        return __import__('config')

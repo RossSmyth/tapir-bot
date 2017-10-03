@@ -34,8 +34,6 @@ def setup_logging():
 
 def run_bot():
     """The function that actually runs the bot"""
-    loop = asyncio.get_event_loop()
-    log = logging.getLogger()
 
     # Should probably put some stuff here later for the database
 
