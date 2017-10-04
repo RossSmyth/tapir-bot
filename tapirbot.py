@@ -36,7 +36,6 @@ class TapirBot(commands.Bot):
                          help_attrs=dict(hidden=True, name='halp'))
 
         self.client_id = config.client_id
-        self.bots_key = config.bots_key
         self.session = aiohttp.ClientSession(loop=self.loop)
 
         self.db = Database(sql_file)
