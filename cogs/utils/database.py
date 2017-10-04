@@ -82,9 +82,14 @@ class Database:
         return self.cursor.execute(self._get_raffle, (channel_id,))
 
     async def add_to_raffle(self, channel_id, user_id):
+        """Adds a user to a channel's raffle"""
         self.cursor.execute(self._add_raffle, (channel_id, user_id))
         self.db.commit()
         return True
+
+    async def close(self):
+        """Closes the database"""
+        self.db.close()
 
     async def get_ignore_embed(self, ctx):
         """Gets the ignores for a guild. Returns a discord.Embed object

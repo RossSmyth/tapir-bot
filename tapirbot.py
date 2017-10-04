@@ -5,6 +5,7 @@ import traceback
 
 import aiohttp
 from discord.ext import commands
+from cogs.utils.database import Database
 
 import config
 
@@ -37,6 +38,8 @@ class TapirBot(commands.Bot):
         self.client_id = config.client_id
         self.bots_key = config.bots_key
         self.session = aiohttp.ClientSession(loop=self.loop)
+
+        self.db: Database  # Just annotates because it gets instanced at runtime
 
         for extension in initial_extensions:
             try:
@@ -83,6 +86,7 @@ class TapirBot(commands.Bot):
         """Closes all connections cleanly"""
         await super().close()
         await self.session.close()
+        await self.db.close()
 
     def run(self):
         """Passes the secret token to the run method"""

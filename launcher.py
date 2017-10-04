@@ -2,6 +2,7 @@ import asyncio
 import contextlib
 import logging
 
+from cogs.utils.database import Database
 from tapirbot import TapirBot
 
 
@@ -35,10 +36,8 @@ def setup_logging():
 def run_bot():
     """The function that actually runs the bot"""
 
-    # Should probably put some stuff here later for the database
-
     bot = TapirBot()
-    # More database stuff here probably
+    bot.db = Database('tapirbot.sql')
     bot.run()
 
 if __name__ == '__main__ ':
