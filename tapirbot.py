@@ -21,7 +21,6 @@ initial_extensions = [
     'cogs.ships',
     'cogs.star_citizen',
     'cogs.xkcd',
-    'cogs.repl',
     'cogs.misc'
     ]
 
