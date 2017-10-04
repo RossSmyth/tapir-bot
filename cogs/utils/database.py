@@ -9,7 +9,7 @@ class Database:
     Abstracts most stuff away from me so that I don't have to type stuff every
     time
     """
-    def __init__(self, file):
+    def __init__(self, file: str):
         self.db = sqlite3.connect(file)
         self.db.row_factory = lambda cursor, row: row[0]
         self.cursor = self.db.cursor()
@@ -36,7 +36,7 @@ class Database:
         self.db.commit()
         return True
 
-    async def query(self, statement, *args):
+    async def query(self, statement: str, *args):
         """Just runs a SQL statement like normal"""
         try:
             results = self.cursor.execute(statement, args).fetchall()
@@ -49,7 +49,7 @@ class Database:
         """Gets the plonks for the bot"""
         return self.cursor.execute(self._get_plonks).fetchall()
 
-    async def add_plonk(self, user_id):
+    async def add_plonk(self, user_id: int):
         """Adds a user to the plonk list"""
         self.cursor.execute(self._add_plonk, (user_id,))
         self.db.commit()
@@ -59,7 +59,7 @@ class Database:
         """Gets the tapirs the bot has"""
         return self.cursor.execute(self._get_tapirs).fetchall()
 
-    async def add_tapir(self, tapir):
+    async def add_tapir(self, tapir: str):
         """Adds a tapir to the database"""
         self.cursor.execute(self._add_tapir, (tapir,))
         self.db.commit()
@@ -70,18 +70,18 @@ class Database:
         ignores = self._get_ignores.format(ctx.guild.id)
         return self.cursor.execute(ignores).fetchall()
 
-    async def add_ignore(self, ctx, channel_id):
+    async def add_ignore(self, ctx, channel_id: int):
         """Adds a channel to the ignore list"""
         statement = self._add_ignore.format(ctx.guild.id)
         self.cursor.execute(statement, (channel_id,))
         self.db.commit()
         return True
 
-    async def get_raffle(self, channel_id):
+    async def get_raffle(self, channel_id: int):
         """Grabs a whole raffle from a channel's row"""
         return self.cursor.execute(self._get_raffle, (channel_id,))
 
-    async def add_to_raffle(self, channel_id, user_id):
+    async def add_to_raffle(self, channel_id: str, user_id: str):
         """Adds a user to a channel's raffle"""
         self.cursor.execute(self._add_raffle, (channel_id, user_id))
         self.db.commit()

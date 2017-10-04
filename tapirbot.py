@@ -29,7 +29,7 @@ discord_logger = logging.getLogger(__name__)
 
 
 class TapirBot(commands.Bot):
-    def __init__(self):
+    def __init__(self, sql_file: str):
         super().__init__(command_prefix=['!'],
                          description=description,
                          pm_help=None,
@@ -39,7 +39,7 @@ class TapirBot(commands.Bot):
         self.bots_key = config.bots_key
         self.session = aiohttp.ClientSession(loop=self.loop)
 
-        self.db: Database  # Just annotates because it gets instanced at runtime
+        self.db = Database(sql_file)
 
         for extension in initial_extensions:
             try:
