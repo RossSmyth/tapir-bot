@@ -73,21 +73,20 @@ class Meta:
 
         await self.say_permissions(ctx, member, channel)
 
-        @commands.command()
-        @commands.guild_only()
-        @checks.admin_or_permissions(manage_roles=True)
-        async def botpermissions(self, ctx, *,
-                                 channel: discord.TextChannel = None):
-            """Shows the bot's permissions in a specific channel.
-            If no channel is given then it uses the current one.
-            This is a good way of checking if the bot has the permissions needed
-            to execute the commands it wants to execute.
-            To execute this command you must have Manage Roles permission.
-            You cannot use this in private messages.
-            """
-            channel = channel or ctx.channel
-            member = ctx.guild.me
-            await self.say_permissions(ctx, member, channel)
+    @commands.command()
+    @commands.guild_only()
+    @checks.admin_or_permissions(manage_roles=True)
+    async def botpermissions(self, ctx, *, channel: discord.TextChannel = None):
+        """Shows the bot's permissions in a specific channel.
+        If no channel is given then it uses the current one.
+        This is a good way of checking if the bot has the permissions needed
+        to execute the commands it wants to execute.
+        To execute this command you must have Manage Roles permission.
+        You cannot use this in private messages.
+        """
+        channel = channel or ctx.channel
+        member = ctx.guild.me
+        await self.say_permissions(ctx, member, channel)
     
     @commands.command()
     async def oauth(self):

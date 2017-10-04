@@ -1,397 +1,321 @@
-from discord.ext import commands
-from .utils import config, checks
+import argparse
 from collections import Counter
 import re
+import shlex
+
 import discord
-import asyncio
+from discord.ext import commands
+from .utils import checks
+
+
+class Arguments(argparse.ArgumentParser):
+    """Argument thing for the remove command group"""
+    def error(self, message):
+        raise RuntimeError(message)
+
+
+class MemberID(commands.Converter):
+    """Converter for Member IDs"""
+    async def convert(self, ctx, argument):
+        try:
+            m = await commands.MemberConverter().convert(ctx, argument)
+        except commands.BadArgument:
+            try:
+                return int(argument, base=10)
+            except ValueError:
+                raise commands.BadArgument(f"{argument} is not a valid member "
+                                           f"or member ID.") from None
+        else:
+            can_execute = ctx.author.id == ctx.bot.owner_id or \
+                          ctx.author == ctx.guild.owner or \
+                          ctx.author.top_role > m.top_role
+
+            if not can_execute:
+                raise commands.BadArgument('You cannot do this action on this '
+                                           'user due to role hierarchy.')
+            return m.id
+
+
+class ActionReason(commands.Converter):
+    async def convert(self, ctx, argument):
+        """Converter for moderation reasons"""
+        ret = f'{ctx.author} (ID: {ctx.author.id}): {argument}'
+
+        if len(ret) > 512:
+            reason_max = 512 - len(ret) - len(argument)
+            raise commands.BadArgument(f'reason is too long '
+                                       f'({len(argument)}/{reason_max})')
+        return ret
+
 
 class Mod:
     """Moderation related commands."""
 
     def __init__(self, bot):
         self.bot = bot
-        self.config = config.Config('mod.json', loop=bot.loop)
 
-    def bot_user(self, message):
-        return message.server.me if message.channel.is_private else self.bot.user
-		
-    def __check(self, ctx):
-        msg = ctx.message
-        if checks.is_owner_check(msg):
-            return True
+    async def _basic_cleanup_strategy(self, ctx, search):
+        count = 0
+        async for msg in ctx.history(limit=search, before=ctx.message):
+            if msg.author == ctx.me:
+                await msg.delete()
+                count += 1
+        return {'Bot': count}
 
-        # user is bot banned
-        if msg.author.id in self.config.get('plonks', []):
-            return False
+    async def _complex_cleanup_strategy(self, ctx, search):
+        prefixes = tuple(self.bot.get_guild_prefixes(ctx.guild))
 
-        # check if the channel is ignored
-        # but first, resolve their permissions
+        def check(m):
+            return m.author == ctx.me or m.content.startswith(prefixes)
 
-        perms = msg.channel.permissions_for(msg.author)
-        bypass_ignore = perms.administrator
+        deleted = await ctx.channel.purge(limit=search, check=check,
+                                          before=ctx.message)
+        return Counter(m.author.display_name for m in deleted)
 
-        # now we can finally realise if we can actually bypass the ignore.
-
-        if not bypass_ignore and msg.channel.id in self.config.get('ignored', []):
-            return False
-
-        return True
-
-    @commands.group(pass_context=True, no_pm=True)
-    @checks.admin_or_permissions(administrator=True)
-    async def ignore(self, ctx):
-        """Handles the bot's ignore lists.
-        To use these commands, you must have the Bot Admin role or have
-        Manage Channels permissions. These commands are not allowed to be used
-        in a private message context.
-        Users with Manage Roles or Bot Admin role can still invoke the bot
-        in ignored channels.
-        """
-        if ctx.invoked_subcommand is None:
-            await self.bot.say('Invalid subcommand passed: {0.subcommand_passed}'.format(ctx))
-            
-    @ignore.command(name='list', pass_context=True)
-    async def ignore_list(self, ctx):
-        """Tells you what channels are currently ignored in this server."""
-
-        ignored = self.config.get('ignored', [])
-        channel_ids = set(c.id for c in ctx.message.server.channels)
-        result = []
-        for channel in ignored:
-            if channel in channel_ids:
-                result.append('<#{}>'.format(channel))
-
-        if result:
-            await self.bot.say('The following channels are ignored:\n\n{}'.format(', '.join(result)))
-        else:
-            await self.bot.say('I am not ignoring any channels here.')
-            
-    @ignore.command(name='channel', pass_context=True)
-    async def channel_cmd(self, ctx, *, channel : discord.Channel = None):
-        """Ignores a specific channel from being processed.
-        If no channel is specified, the current channel is ignored.
-        If a channel is ignored then the bot does not process commands in that
-        channel until it is unignored.
-        """
-
-        if channel is None:
-            channel = ctx.message.channel
-
-        ignored = self.config.get('ignored', [])
-        if channel.id in ignored:
-            await self.bot.say('That channel is already ignored.')
-            return
-
-        ignored.append(channel.id)
-        await self.config.put('ignored', ignored)
-        await self.bot.say('\U0001f44c')
-        
-    @ignore.command(name='all', pass_context=True)
-    async def _all(self, ctx):
-        """Ignores every channel in the server from being processed.
-        This works by adding every channel that the server currently has into
-        the ignore list. If more channels are added then they will have to be
-        ignored by using the ignore command.
-        To use this command you must have Manage Server permissions along with
-        Manage Channels permissions. You could also have the Bot Admin role.
-        """
-
-        ignored = self.config.get('ignored', [])
-        channels = ctx.message.server.channels
-        ignored.extend(c.id for c in channels if c.type == discord.ChannelType.text)
-        await self.config.put('ignored', list(set(ignored))) # make unique
-        await self.bot.say('\U0001f44c')
-        
-    @commands.command(pass_context=True, no_pm=True)
-    @checks.admin_or_permissions(administrator=True)
-    async def unignore(self, ctx, *, channel : discord.Channel = None):
-        """Unignores a specific channel from being processed.
-        If no channel is specified, it unignores the current channel.
-        To use this command you must have the Manage Channels permission or have the
-        Bot Admin role.
-        """
-
-        if channel is None:
-            channel = ctx.message.channel
-
-        # a set is the proper data type for the ignore list
-        # however, JSON only supports arrays and objects not sets.
-        ignored = self.config.get('ignored', [])
-        try:
-            ignored.remove(channel.id)
-        except ValueError:
-            await self.bot.say('Channel was not ignored in the first place.')
-        else:
-            await self.bot.say('\U0001f44c')
-            
-    @commands.command(no_pm=True)
-    @checks.admin_or_permissions(administrator=True)
-    async def plonk(self, *, member : discord.Member):
-        """Bans a user from using the bot.
-        Note that this ban is **global**. So they are banned from
-        all servers that they access the bot with. So use this with
-        caution.
-        There is no way to bypass a plonk regardless of role or permissions.
-        The only person who cannot be plonked is the bot creator. So this
-        must be used with caution.
-        To use this command you must have the Manage Server permission
-        or have a Bot Admin role.
-        """
-
-        plonks = self.config.get('plonks', [])
-        if member.id in plonks:
-            await self.bot.say('That user is already bot banned.')
-            return
-
-        plonks.append(member.id)
-        await self.config.put('plonks', plonks)
-        await self.bot.say('{0.name} has been banned from using the bot.'.format(member))
-        
-    @commands.command(no_pm=True)
-    @checks.admin_or_permissions(administrator=True)
-    async def unplonk(self, *, member : discord.Member):
-        """Unbans a user from using the bot.
-        To use this command you must have the Manage Server permission
-        or have a Bot Admin role.
-        """
-
-        plonks = self.config.get('plonks', [])
-
-        try:
-            plonks.remove(member.id)
-        except ValueError:
-            pass
-        else:
-            await self.config.put('plonks', plonks)
-            await self.bot.say('{0.name} has been unbanned from using the bot.'.format(member))
-
-    @commands.command(pass_context=True, no_pm=True)
-    @checks.mod_or_permissions(manage_messages=True)
-    async def cleanup(self, ctx, search : int = 100):
+    @commands.command()
+    @checks.has_permissions(manage_messages=True)
+    async def cleanup(self, ctx, search=100):
         """Cleans up the bot's messages from the channel.
+
         If a search number is specified, it searches that many messages to delete.
-        If the bot has Manage Messages permissions, then it will try to delete
+        If the bot has Manage Messages permissions then it will try to delete
         messages that look like they invoked the bot as well.
+
         After the cleanup is completed, the bot will send you a message with
         which people got their messages deleted and their count. This is useful
         to see which users are spammers.
-        To use this command you must have Manage Messages permission or have the
-        Bot Mod role.
+
+        You must have Manage Messages permission to use this.
         """
 
-        spammers = Counter()
-        channel = ctx.message.channel
-        prefixes = self.bot.command_prefix
-        if callable(prefixes):
-            prefixes = prefixes(self.bot, ctx.message)
+        strategy = self._basic_cleanup_strategy
+        if ctx.me.permissions_in(ctx.channel).manage_messages:
+            strategy = self._complex_cleanup_strategy
 
-        def is_possible_command_invoke(entry):
-            valid_call = any(entry.content.startswith(prefix) for prefix in prefixes)
-            return valid_call and not entry.content[1:2].isspace()
-
-        can_delete = channel.permissions_for(channel.server.me).manage_messages
-
-        if not can_delete:
-            api_calls = 0
-            async for entry in self.bot.logs_from(channel, limit=search, before=ctx.message):
-                if api_calls and api_calls % 5 == 0:
-                    await asyncio.sleep(1.1)
-
-                if entry.author == self.bot.user:
-                    await self.bot.delete_message(entry)
-                    spammers['Bot'] += 1
-                    api_calls += 1
-
-                if is_possible_command_invoke(entry):
-                    try:
-                        await self.bot.delete_message(entry)
-                    except discord.Forbidden:
-                        continue
-                    else:
-                        spammers[entry.author.display_name] += 1
-                        api_calls += 1
-        else:
-            predicate = lambda m: m.author == self.bot.user or is_possible_command_invoke(m)
-            deleted = await self.bot.purge_from(channel, limit=search, before=ctx.message, check=predicate)
-            spammers = Counter(m.author.display_name for m in deleted)
-
+        spammers = await strategy(ctx, search)
         deleted = sum(spammers.values())
-        messages = ['{} message(s) were deleted.'.format(deleted)]
+        messages = [f'{deleted} message{" was" if deleted == 1 else "s were"} '
+                    f'removed.']
         if deleted:
             messages.append('')
-            spammers = sorted(spammers.items(), key=lambda t: t[1], reverse=True)
-            messages.extend(map(lambda t: '- **{0[0]}**: {0[1]}'.format(t), spammers))
+            spammers = sorted(spammers.items(), key=lambda t: t[1],
+                              reverse=True)
 
-        await self.bot.say('\n'.join(messages), delete_after=10)
+            messages.extend(f'- **{author}**: {count}' for author,
+                            count in spammers)
 
-    @commands.command(no_pm=True)
-    @checks.admin_or_permissions(kick_members=True)
-    async def kick(self, *, member : discord.Member):
+        await ctx.send('\n'.join(messages), delete_after=10)
+
+    @commands.command()
+    @commands.guild_only()
+    @checks.has_permissions(kick_members=True)
+    async def kick(self, ctx, member: discord.Member, *,
+                   reason: ActionReason = None):
         """Kicks a member from the server.
         In order for this to work, the bot must have Kick Member permissions.
-        To use this command you must have Kick Members permission or have the
-        Bot Admin role.
+        To use this command you must have Kick Members permission.
         """
 
-        try:
-            await self.bot.kick(member)
-        except discord.Forbidden:
-            await self.bot.say('The bot does not have permissions to kick members.')
-        except discord.HTTPException:
-            await self.bot.say('Kicking failed.')
-        else:
-            await self.bot.say('\U0001f44c')
+        if reason is None:
+            reason = f'Action done by {ctx.author} (ID: {ctx.author.id})'
 
-    @commands.command(no_pm=True)
-    @checks.admin_or_permissions(ban_members=True)
-    async def ban(self, *, member : discord.Member):
+        await member.kick(reason=reason)
+        await ctx.send('\N{OK HAND SIGN}')
+
+    @commands.command()
+    @commands.guild_only()
+    @checks.has_permissions(ban_members=True)
+    async def ban(self, ctx, member: MemberID, *, reason: ActionReason = None):
         """Bans a member from the server.
+        You can also ban from ID to ban regardless whether they're
+        in the server or not.
         In order for this to work, the bot must have Ban Member permissions.
-        To use this command you must have Ban Members permission or have the
-        Bot Admin role.
+        To use this command you must have Ban Members permission.
         """
 
-        try:
-            await self.bot.ban(member)
-        except discord.Forbidden:
-            await self.bot.say('The bot does not have permissions to ban members.')
-        except discord.HTTPException:
-            await self.bot.say('Banning failed.')
-        else:
-            await self.bot.say('\U0001f44c')
+        if reason is None:
+            reason = f'Action done by {ctx.author} (ID: {ctx.author.id})'
 
+        await ctx.guild.ban(discord.Object(id=member), reason=reason)
+        await ctx.send('\N{OK HAND SIGN}')
 
-    @commands.command(no_pm=True)
-    @checks.admin_or_permissions(ban_members=True)
-    async def softban(self, *, member : discord.Member):
+    @commands.command()
+    @commands.guild_only()
+    @checks.has_permissions(kick_members=True)
+    async def softban(self, ctx, member: MemberID, *,
+                      reason: ActionReason = None):
         """Soft bans a member from the server.
+
         A softban is basically banning the member from the server but
         then unbanning the member as well. This allows you to essentially
         kick the member while removing their messages.
-        To use this command you must have Ban Members permissions or have
-        the Bot Admin role. Note that the bot must have the permission as well.
+
+        In order for this to work, the bot must have Ban Member permissions.
+
+        To use this command you must have Kick Members permissions.
         """
 
-        try:
-            await self.bot.ban(member)
-            await self.bot.unban(member.server, member)
-        except discord.Forbidden:
-            await self.bot.say('The bot does not have permissions to ban members.')
-        except discord.HTTPException:
-            await self.bot.say('Banning failed.')
-        else:
-            await self.bot.say('\U0001f44c')
+        if reason is None:
+            reason = f'Action done by {ctx.author} (ID: {ctx.author.id})'
 
-    @commands.command(pass_context=True, no_pm=True)
-    @checks.admin_or_permissions(manage_roles=True)
-    async def colour(self, ctx, colour : discord.Colour, *, role : discord.Role):
-        """Changes the colour of a role.
-        The colour must be a hexadecimal value, e.g. FF2AEF. Don't prefix it
-        with a pound (#) as it won't work. Colour names are also not supported.
-        To use this command you must have the Manage Roles permission or
-        have the Bot Admin role. The bot must also have Manage Roles permissions.
-        This command cannot be used in a private message.
-        """
-        try:
-            await self.bot.edit_role(ctx.message.server, role, colour=colour)
-        except discord.Forbidden:
-            await self.bot.say('The bot must have Manage Roles permissions to use this.')
-        else:
-            await self.bot.say('\U0001f44c')
+        obj = discord.Object(id=member)
+        await ctx.guild.ban(obj, reason=reason)
+        await ctx.guild.unban(obj, reason=reason)
+        await ctx.send('\N{OK HAND SIGN}')
 
-    @commands.group(pass_context=True, no_pm=True, aliases=['purge'])
-    @checks.admin_or_permissions(manage_messages=True)
+    @commands.group(aliases=['purge'])
+    @commands.guild_only()
+    @checks.has_permissions(manage_messages=True)
     async def remove(self, ctx):
         """Removes messages that meet a criteria.
-        In order to use this command, you must have Manage Messages permissions
-        or have the Bot Admin role. Note that the bot needs Manage Messages as
-        well. These commands cannot be used in a private message.
-        When the command is done doing its work, you will get a private message
+        In order to use this command, you must have Manage Messages permissions.
+        Note that the bot needs Manage Messages as well. These commands cannot
+        be used in a private message.
+        When the command is done doing its work, you will get a message
         detailing which users got removed and how many messages got removed.
         """
 
         if ctx.invoked_subcommand is None:
-            await self.bot.say('Invalid criteria passed "{0.subcommand_passed}"'.format(ctx))
+            help_cmd = self.bot.get_command('help')
+            await ctx.invoke(help_cmd, command='remove')
 
-    async def do_removal(self, message, limit, predicate):
-        deleted = await self.bot.purge_from(message.channel, limit=limit, before=message, check=predicate)
+    async def do_removal(self, ctx, limit, predicate, *, before=None,
+                         after=None):
+        if limit > 2000:
+            return await ctx.send(
+                f'Too many messages to search given ({limit}/2000)')
+
+        if before is None:
+            before = ctx.message
+        else:
+            before = discord.Object(id=before)
+
+        if after is not None:
+            after = discord.Object(id=after)
+
+        try:
+            deleted = await ctx.channel.purge(limit=limit, before=before,
+                                              after=after, check=predicate)
+        except discord.Forbidden as e:
+            return await ctx.send(
+                'I do not have permissions to delete messages.')
+        except discord.HTTPException as e:
+            return await ctx.send(f'Error: {e} (try a smaller search?)')
+
         spammers = Counter(m.author.display_name for m in deleted)
-        messages = ['{} messages(s) were removed.'.format(len(deleted))]
-        if len(deleted):
+        deleted = len(deleted)
+        messages = [
+            f'{deleted} message{" was" if deleted == 1 else "s were"} removed.']
+        if deleted:
             messages.append('')
-            spammers = sorted(spammers.items(), key=lambda t: t[1], reverse=True)
-            messages.extend(map(lambda t: '**{0[0]}**: {0[1]}'.format(t), spammers))
+            spammers = sorted(spammers.items(), key=lambda t: t[1],
+                              reverse=True)
+            messages.extend(f'**{name}**: {count}' for name, count in spammers)
 
-        await self.bot.say('\n'.join(messages), delete_after=10)
+        to_send = '\n'.join(messages)
 
-    @remove.command(pass_context=True)
+        if len(to_send) > 2000:
+            await ctx.send(f'Successfully removed {deleted} messages.',
+                           delete_after=10)
+        else:
+            await ctx.send(to_send, delete_after=10)
+
+    @remove.command()
     async def embeds(self, ctx, search=100):
         """Removes messages that have embeds in them."""
-        await self.do_removal(ctx.message, search, lambda e: len(e.embeds))
+        await self.do_removal(ctx, search, lambda e: len(e.embeds))
 
-    @remove.command(pass_context=True)
+    @remove.command()
     async def files(self, ctx, search=100):
         """Removes messages that have attachments in them."""
-        await self.do_removal(ctx.message, search, lambda e: len(e.attachments))
+        await self.do_removal(ctx, search, lambda e: len(e.attachments))
 
-    @remove.command(pass_context=True)
+    @remove.command()
     async def images(self, ctx, search=100):
         """Removes messages that have embeds or attachments."""
-        await self.do_removal(ctx.message, search, lambda e: len(e.embeds) or len(e.attachments))
+        await self.do_removal(ctx, search,
+                              lambda e: len(e.embeds) or len(e.attachments))
 
-    @remove.command(name='all', pass_context=True)
+    @remove.command(name='all')
     async def _remove_all(self, ctx, search=100):
         """Removes all messages."""
-        await self.do_removal(ctx.message, search, lambda e: True)
+        await self.do_removal(ctx, search, lambda e: True)
 
-    @remove.command(pass_context=True)
-    async def user(self, ctx, member : discord.Member, search=100):
+    @remove.command()
+    async def user(self, ctx, member: discord.Member, search=100):
         """Removes all messages by the member."""
-        await self.do_removal(ctx.message, search, lambda e: e.author == member)
+        await self.do_removal(ctx, search, lambda e: e.author == member)
 
-    @remove.command(pass_context=True)
-    async def contains(self, ctx, *, substr : str):
+    @remove.command()
+    async def contains(self, ctx, *, substr: str):
         """Removes all messages containing a substring.
         The substring must be at least 3 characters long.
         """
         if len(substr) < 3:
-            await self.bot.say('The substring length must be at least 3 characters.')
-            return
+            await ctx.send(
+                'The substring length must be at least 3 characters.')
+        else:
+            await self.do_removal(ctx, 100, lambda e: substr in e.content)
 
-        await self.do_removal(ctx.message, 100, lambda e: substr in e.content)
-
-    @remove.command(name='bot', pass_context=True)
-    async def _bot(self, ctx, prefix, *, member: discord.Member):
-        """Removes a bot user's messages and messages with their prefix.
-        The member doesn't have to have the [Bot] tag to qualify for removal.
-        """
+    @remove.command(name='bot')
+    async def _bot(self, ctx, prefix=None, search=100):
+        """Removes a bot user's messages and messages with their optional prefix."""
 
         def predicate(m):
-            return m.author == member or m.content.startswith(prefix)
-        await self.do_removal(ctx.message, 100, predicate)
+            return m.author.bot or (prefix and m.content.startswith(prefix))
 
-    @remove.command(pass_context=True)
+        await self.do_removal(ctx, search, predicate)
+
+    @remove.command(name='emoji')
+    async def _emoji(self, ctx, search=100):
+        """Removes all messages containing custom emoji."""
+        custom_emoji = re.compile(r'<:(\w+):(\d+)>')
+
+        def predicate(m):
+            return custom_emoji.search(m.content)
+
+        await self.do_removal(ctx, search, predicate)
+
+    @remove.command(name='reactions')
+    async def _reactions(self, ctx, search=100):
+        """Removes all reactions from messages that have them."""
+
+        if search > 2000:
+            return await ctx.send(
+                f'Too many messages to search for ({search}/2000)')
+
+        total_reactions = 0
+        async for message in ctx.history(limit=search, before=ctx.message):
+            if len(message.reactions):
+                total_reactions += sum(r.count for r in message.reactions)
+                await message.clear_reactions()
+
+        await ctx.send(f'Successfully removed {total_reactions} reactions.')
+
+    @remove.command()
     async def custom(self, ctx, *, args: str):
-        """A more advanced prune command.
-        Allows you to specify more complex prune commands with multiple
-        conditions and search criteria. The criteria are passed in the
-        syntax of `--criteria value`. Most criteria support multiple
-        values to indicate 'any' match. A flag does not have a value.
+        """A more advanced purge command.
+        This command uses a powerful "command line" syntax.
+        Most options support multiple values to indicate 'any' match.
         If the value has spaces it must be quoted.
-        The messages are only deleted if all criteria are met unless
-        the `--or` flag is passed.
-        Criteria:
-          user      A mention or name of the user to remove.
-          contains  A substring to search for in the message.
-          starts    A substring to search if the message starts with.
-          ends      A substring to search if the message ends with.
-          bot       A flag indicating if it's a bot user.
-          embeds    A flag indicating if the message has embeds.
-          files     A flag indicating if the message has attachments.
-          emoji     A flag indicating if the message has custom emoji.
-          search    How many messages to search. Default 100. Max 2000.
-          or        A flag indicating to use logical OR for all criteria.
-          not       A flag indicating to use logical NOT for all criteria.
+        The messages are only deleted if all options are met unless
+        the `--or` flag is passed, in which case only if any is met.
+        The following options are valid.
+        `--user`: A mention or name of the user to remove.
+        `--contains`: A substring to search for in the message.
+        `--starts`: A substring to search if the message starts with.
+        `--ends`: A substring to search if the message ends with.
+        `--search`: How many messages to search. Default 100. Max 2000.
+        `--after`: Messages must come after this message ID.
+        `--before`: Messages must come before this message ID.
+        Flag options (no arguments):
+        `--bot`: Check if it's a bot user.
+        `--embeds`: Check if the message has embeds.
+        `--files`: Check if the message has attachments.
+        `--emoji`: Check if the message has custom emoji.
+        `--reactions`: Check if the message has reactions
+        `--or`: Use logical OR for all options.
+        `--not`: Use logical NOT for all options.
         """
         parser = Arguments(add_help=False, allow_abbrev=False)
         parser.add_argument('--user', nargs='+')
@@ -401,15 +325,22 @@ class Mod:
         parser.add_argument('--or', action='store_true', dest='_or')
         parser.add_argument('--not', action='store_true', dest='_not')
         parser.add_argument('--emoji', action='store_true')
-        parser.add_argument('--bot', action='store_const', const=lambda m: m.author.bot)
-        parser.add_argument('--embeds', action='store_const', const=lambda m: len(m.embeds))
-        parser.add_argument('--files', action='store_const', const=lambda m: len(m.attachments))
+        parser.add_argument('--bot', action='store_const',
+                            const=lambda m: m.author.bot)
+        parser.add_argument('--embeds', action='store_const',
+                            const=lambda m: len(m.embeds))
+        parser.add_argument('--files', action='store_const',
+                            const=lambda m: len(m.attachments))
+        parser.add_argument('--reactions', action='store_const',
+                            const=lambda m: len(m.reactions))
         parser.add_argument('--search', type=int, default=100)
+        parser.add_argument('--after', type=int)
+        parser.add_argument('--before', type=int)
 
         try:
             args = parser.parse_args(shlex.split(args))
         except Exception as e:
-            await self.bot.say(str(e))
+            await ctx.send(str(e))
             return
 
         predicates = []
@@ -422,40 +353,50 @@ class Mod:
         if args.files:
             predicates.append(args.files)
 
+        if args.reactions:
+            predicates.append(args.reactions)
+
         if args.emoji:
             custom_emoji = re.compile(r'<:(\w+):(\d+)>')
             predicates.append(lambda m: custom_emoji.search(m.content))
 
         if args.user:
             users = []
+            converter = commands.MemberConverter()
             for u in args.user:
                 try:
-                    converter = commands.MemberConverter(ctx, u)
-                    users.append(converter.convert())
+                    user = await converter.convert(ctx, u)
+                    users.append(user)
                 except Exception as e:
-                    await self.bot.say(str(e))
+                    await ctx.send(str(e))
                     return
 
             predicates.append(lambda m: m.author in users)
 
         if args.contains:
-            predicates.append(lambda m: any(sub in m.content for sub in args.contains))
+            predicates.append(
+                lambda m: any(sub in m.content for sub in args.contains))
 
         if args.starts:
-            predicates.append(lambda m: any(m.content.startswith(s) for s in args.starts))
+            predicates.append(
+                lambda m: any(m.content.startswith(s) for s in args.starts))
 
         if args.ends:
-            predicates.append(lambda m: any(m.content.endswith(s) for s in args.ends))
+            predicates.append(
+                lambda m: any(m.content.endswith(s) for s in args.ends))
 
         op = all if not args._or else any
+
         def predicate(m):
             r = op(p(m) for p in predicates)
             if args._not:
                 return not r
             return r
 
-        args.search = max(0, min(2000, args.search)) # clamp from 0-2000
-        await self.do_removal(ctx.message, args.search, predicate)
+        args.search = max(0, min(2000, args.search))  # clamp from 0-2000
+        await self.do_removal(ctx, args.search, predicate, before=args.before,
+                              after=args.after)
+
 
 def setup(bot):
     bot.add_cog(Mod(bot))
