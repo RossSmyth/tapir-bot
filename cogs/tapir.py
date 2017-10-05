@@ -23,7 +23,7 @@ class Tapir:
 
     @commands.command(hidden=True)
     @commands.is_owner()
-    async def save_tapir(self, ctx, *, tapir_link):
+    async def save_tapir(self, ctx, *, tapir_link: str):
         """allows the saving of a tapirs by owner only"""
         success = await self.bot.db.add_tapir(tapir=tapir_link)
 

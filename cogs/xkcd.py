@@ -11,7 +11,7 @@ class XKCD:
     def __init__(self, bot):
         self.bot = bot
         
-    def formatter(self, data):
+    def formatter(self, data: dict):
         """Formats the XKCD json data into an embed"""
 
         # Getting the data from the JSON

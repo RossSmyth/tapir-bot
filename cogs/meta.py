@@ -24,7 +24,7 @@ class Meta:
 
     @commands.command(hidden=True, aliases=['say'])
     @commands.is_owner()
-    async def echo(self, *, content):
+    async def echo(self, *, content: str):
         """says stuff that I tell it to"""
         await self.bot.say(content)
         

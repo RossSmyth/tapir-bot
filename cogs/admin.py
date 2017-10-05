@@ -17,7 +17,7 @@ class Admin:
         self._last_result = None
         self.sessions = set()
 
-    def cleanup_code(self, content):
+    def cleanup_code(self, content: str):
             """Automatically removes code blocks from the code."""
             # remove ```py\n```
             if content.startswith('```') and content.endswith('```'):
