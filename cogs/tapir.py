@@ -1,34 +1,37 @@
-from discord.ext import commands
-from .utils import config, checks
 import random
+
 import discord
-import asyncio
+from discord.ext import commands
+
 
 class Tapir:
-    """the tapir command(s)"""
+    """the famous tapir commands"""
     
     def __init__(self, bot):
         self.bot = bot
-        self.config = config.Config('tapirs.json', loop=bot.loop)
         
-    @commands.command(cooldown=5)
-    async def tapir(self):
+    @commands.command()
+    async def tapir(self, ctx):
         """The wonderful tapir command that outputs a random tapir"""
-        tapir_list = self.config.get('tapirs', [])
+        tapir_list = await self.bot.db.get_tapirs()
         tapir = tapir_list[random.randrange(len(tapir_list))]
         try:
-            await self.bot.say(tapir)
+            await ctx.send(tapir)
         except:
-            await self.bot.whisper(tapir)
+            await ctx.author.send(
+                embed=discord.Embed(colour=12884062).set_image(url=tapir))
 
     @commands.command(hidden=True)
-    @checks.is_owner()
-    async def save_tapir(self, *, tapir_link):
-        """allows the saving of a tapirs"""
-        tapir_list = self.config.get('tapirs', [])
-        tapir_list.append(tapir_link)
-        await self.config.put('tapirs', tapir_list)
-        await self.bot.say('\N{OK HAND SIGN}')
-        
+    @commands.is_owner()
+    async def save_tapir(self, ctx, *, tapir_link):
+        """allows the saving of a tapirs by owner only"""
+        success = await self.bot.db.add_tapir(tapir=tapir_link)
+
+        if success:
+            await ctx.send('\N{OK HAND SIGN}')
+        else:
+            await ctx.send('\N{PISTOL}')
+
+
 def setup(bot):
     bot.add_cog(Tapir(bot))

@@ -12,7 +12,7 @@ class XKCD:
         self.bot = bot
         
     def formatter(self, data):
-        """Formats the XKCD json data"""
+        """Formats the XKCD json data into an embed"""
 
         # Getting the data from the JSON
         day = data['day']
