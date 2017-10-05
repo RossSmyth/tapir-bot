@@ -35,7 +35,7 @@ def setup_logging():
 def run_bot():
     """The function that actually runs the bot"""
 
-    bot = TapirBot('tapirbot.sql')
+    bot = TapirBot('tapirbot.db')
     bot.run()
 
 if __name__ == '__main__ ':

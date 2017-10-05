@@ -1,58 +1,76 @@
-from discord.ext import commands
-from .utils import config, checks
-from urllib.request import urlopen
-import json
+import datetime
+
+import aiohttp
+
 import discord
-import asyncio
+from discord.ext import commands
+
 
 class XKCD:
     
     def __init__(self, bot):
         self.bot = bot
         
-    async def formatter(self, data):
+    def formatter(self, data):
         """Formats the XKCD json data"""
-        day = 'day'
-        month = 'month'
-        year = 'year'
-        number = 'num'
-        title = 'title'
-        hidden = 'alt'
-        image = 'img'
-        
-        template = '```Date: {} \nNumber: {} \nTitle: {} \nTooltip Text: {} \n```{}'
-        
-        day = data[day]
-        month = data[month]
-        year = data[year]
-        number = data[number]
-        title = data[title]
-        hidden = data[hidden]
-        image = data[image]
-        
-        date = '{}-{}-{}'.format(month, day, year)
-        
-        complete = template.format(date, number, title, hidden, image)
-        
+
+        # Getting the data from the JSON
+        day = data['day']
+        month = data['month']
+        year = data['year']
+        number = data['num']
+        title = data['title']
+        alt = data['alt']
+        image = data['img']
+
+        # Formatting the data
+        embed_date = datetime.date(year=int(year),
+                                   month=int(month),
+                                   day=int(day)).strftime("%a %b %dth, %Y")
+
+        embed_description = f'xkcd #{number}'
+        embed_title = f'{title}'
+        embed_colour = 0x96a8c8
+        embed_url = f'https://xkcd.com/{number}/'
+
+        # instances the embed object
+        complete = discord.Embed(title=embed_title, url=embed_url,
+                                 description=embed_description,
+                                 colour=embed_colour)
+
+        # sets some of the attributes
+        complete.set_thumbnail(url='https://xkcd.com/s/0b7742.png')
+        complete.set_image(url=image)
+        complete.add_field(name='alt-text', value=alt)
+        complete.set_footer(text=embed_date)
+
         return complete
         
     @commands.command()
-    async def xkcd(self, number=None):
-        """Get your favorite XKCD comics and their attributes!"""
-        
-        if number == None:
-            with urlopen('http://xkcd.com/info.0.json') as comic:
-                comic = comic.read().decode('utf8')
-                comic = json.loads(comic)
-                await self.bot.say(await self.formatter(comic))
-        else:
-            try:
-                with urlopen('http://xkcd.com/{}/info.0.json'.format(number)) as comic:
-                    comic = comic.read().decode('utf8')
-                    comic = json.loads(comic)
-                    await self.bot.say(await self.formatter(comic))
-            except:
-                await self.bot.say('Not a valid comic number')
-                
+    async def xkcd(self, ctx, number: int = None):
+        """Get your favorite XKCD comics and their attributes!
+
+        If there are not any arguments, it returns the most currecnt xkcd. If
+        there are arguments, it will try and find that xkcd.
+        """
+
+        async with aiohttp.ClientSession() as session:
+
+            if number is None:
+                async with session.get('http://xkcd.com/info.0.json') as comic:
+                    comic = await comic.json()
+                    await ctx.send(embed=self.formatter(comic))
+
+            else:
+                try:
+                    async with session.get(
+                            f'http://xkcd.com/{number}/info.0.json') as comic:
+
+                        comic = await comic.json()
+                        await ctx.send(embed=self.formatter(comic))
+                except:
+                    await ctx.send('Not a valid comic number')
+
+
 def setup(bot):
     bot.add_cog(XKCD(bot))
