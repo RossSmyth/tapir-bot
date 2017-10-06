@@ -20,6 +20,8 @@ class Database:
         self._get_plonks = 'SELECT plonks FROM bot'
         self._add_plonk = 'INSERT INTO bot (plonks) VALUES (?)'
 
+        self._get_ship = 'SELECT ? FROM ships'  # This actually needs security
+
         self._get_tapirs = 'SELECT tapirs FROM bot'
         self._add_tapir = 'INSERT INTO bot (tapirs) VALUES (?)'
 
@@ -54,6 +56,12 @@ class Database:
         self.cursor.execute(self._add_plonk, (user_id,))
         self.db.commit()
         return True
+
+    async def get_ship(self, ship_name: str):
+        """Grabs a ship from the ship table. This actually needs to use the
+        libraries' injection protection because I'm just gonna use raw data
+        """
+        return self.cursor.execute(self._get_ship, (ship_name,)).fetchall()
 
     async def get_tapirs(self):
         """Gets the tapirs the bot has"""
