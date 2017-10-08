@@ -11,6 +11,7 @@ class Tapir:
         self.bot = bot
         
     @commands.command()
+    @commands.cooldown(1, 5, commands.BucketType.user)
     async def tapir(self, ctx):
         """The wonderful tapir command that outputs a random tapir"""
         tapir_list = await self.bot.db.get_tapirs()
