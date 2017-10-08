@@ -14,7 +14,7 @@ class Tapir:
     async def tapir(self, ctx):
         """The wonderful tapir command that outputs a random tapir"""
         tapir_list = await self.bot.db.get_tapirs()
-        tapir = tapir_list[random.randrange(len(tapir_list))]
+        tapir = random.choice(tapir_list)
         try:
             await ctx.send(tapir)
         except:
