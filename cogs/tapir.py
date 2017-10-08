@@ -11,9 +11,10 @@ class Tapir:
         self.bot = bot
         
     @commands.command()
-    @commands.cooldown(1, 5, commands.BucketType.user)
+    @commands.cooldown(1, 5, commands.BucketType.channel)
     async def tapir(self, ctx):
-        """The wonderful tapir command that outputs a random tapir"""
+        """The wonderful tapir command that outputs a random tapir
+        This has a cool down of 5 seconds to prevent spam"""
         tapir_list = await self.bot.db.get_tapirs()
         tapir = random.choice(tapir_list)
         try:
