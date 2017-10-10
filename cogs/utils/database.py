@@ -28,8 +28,10 @@ class Database:
         self._get_ignores = "SELECT ignores FROM '{}'"
         self._add_ignore = "INSERT INTO '{}' (ignores) VALUES (?)"
 
+        self._create_raffle = "ALTER TABLE raffles ADD {}"
         self._get_raffle = "SELECT ? FROM raffles"
         self._add_raffle = "INSERT INTO raffles (?) VALUES (?)"
+        self._delete_raffle = "ALTER TABLE raffles DROP COLUMN ?"
 
     async def setup_table(self, ctx):
         """Sets up a table for a guild"""
@@ -85,13 +87,28 @@ class Database:
         self.db.commit()
         return True
 
+    async def create_raffle(self, channel_id: int):
+        """Creates a raffle for a channel"""
+        try:
+            self.cursor.execute(self._create_raffle.format(channel_id))
+            self.db.commit()
+            return True
+        except sqlite3.ProgrammingError:
+            return False
+
     async def get_raffle(self, channel_id: int):
         """Grabs a whole raffle from a channel's row"""
-        return self.cursor.execute(self._get_raffle, (channel_id,))
+        return self.cursor.execute(self._get_raffle, (f'{channel_id}',))
 
     async def add_to_raffle(self, channel_id: str, user_id: str):
         """Adds a user to a channel's raffle"""
-        self.cursor.execute(self._add_raffle, (channel_id, user_id))
+        self.cursor.execute(self._add_raffle, (f'{channel_id}', user_id))
+        self.db.commit()
+        return True
+
+    async def delete_raffle(self, channel_id: str):
+        """Removes a channel's raffle from the table"""
+        self.cursor.execute(self._delete_raffle, channel_id)
         self.db.commit()
         return True
 
