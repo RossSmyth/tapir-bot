@@ -15,7 +15,6 @@ class Database:
         self.cursor = self.db.cursor()
 
         # A bunch of pre-defined statements
-        self._create_table = "CREATE TABLE '{}' (ignores TEXT)"
 
         self._get_plonks = 'SELECT plonks FROM bot'
         self._add_plonk = 'INSERT INTO bot (plonks) VALUES (?)'
@@ -25,8 +24,8 @@ class Database:
         self._get_tapirs = 'SELECT tapirs FROM bot'
         self._add_tapir = 'INSERT INTO bot (tapirs) VALUES (?)'
 
-        self._get_ignores = "SELECT ignores FROM '{}'"
-        self._add_ignore = "INSERT INTO '{}' (ignores) VALUES (?)"
+        self._get_ignores = "SELECT ? FROM ignores"
+        self._add_ignore = "INSERT INTO ignores (?) VALUES (?)"
 
         self._create_raffle = "ALTER TABLE raffles ADD {}"
         self._get_raffle = "SELECT ? FROM raffles"
@@ -77,13 +76,12 @@ class Database:
 
     async def get_ignores(self, ctx):
         """Gets the ignores for a guild"""
-        ignores = self._get_ignores.format(ctx.guild.id)
-        return self.cursor.execute(ignores).fetchall()
+        return self.cursor.execute(self._get_ignores,
+                                   (ctx.server.id,)).fetchall()
 
-    async def add_ignore(self, ctx, channel_id: int):
+    async def add_ignore(self, ctx):
         """Adds a channel to the ignore list"""
-        statement = self._add_ignore.format(ctx.guild.id)
-        self.cursor.execute(statement, (channel_id,))
+        self.cursor.execute(self._add_ignore, (ctx.server.id, ctx.channel.id))
         self.db.commit()
         return True
 
