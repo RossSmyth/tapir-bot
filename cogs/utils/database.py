@@ -18,6 +18,7 @@ class Database:
 
         self._get_plonks = 'SELECT plonks FROM bot'
         self._add_plonk = 'INSERT INTO bot (plonks) VALUES (?)'
+        self._remove_plonk = 'DELETE FROM bot WHERE plonks=?'
 
         self._get_ship = 'SELECT ? FROM ships'  # This actually needs security
 
@@ -55,6 +56,12 @@ class Database:
     async def add_plonk(self, user_id: int):
         """Adds a user to the plonk list"""
         self.cursor.execute(self._add_plonk, (user_id,))
+        self.db.commit()
+        return True
+
+    async def remove_plonk(self, user_id: int):
+        """removes a plonk from the plonk list"""
+        self.cursor.execute(self._remove_plonk, (user_id,))
         self.db.commit()
         return True
 
