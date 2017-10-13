@@ -2,6 +2,7 @@ import argparse
 from collections import Counter
 import re
 import shlex
+import traceback
 
 import discord
 from discord.ext import commands
@@ -71,6 +72,45 @@ class Mod:
         deleted = await ctx.channel.purge(limit=search, check=check,
                                           before=ctx.message)
         return Counter(m.author.display_name for m in deleted)
+
+    @commands.command()
+    @checks.has_guild_permissions(administrator=True)
+    async def plonk(self, ctx, *, member: discord.Member):
+        """Bans a user from using the bot.
+        Note that this ban is **global**. So they are banned from
+        all servers that they access the bot with. So use this with
+        caution.
+        There is no way to bypass a plonk regardless of role or permissions.
+        The only person who cannot be plonked is the bot creator. So this
+        must be used with caution.
+        To use this command you must have the Manage Server permission
+        or have a Bot Admin role.
+        """
+        await self.bot.db.add_plonk(member.id)
+        await ctx.send('\N{OK HAND SIGN}')
+
+    @plonk.error()
+    async def plonk_error(self, ctx, error):
+        """plonk error handler, mainly for database stuff cause that's what
+        will break
+        """
+        await ctx.send('\N{PISTOL}')
+        await ctx.send(f'```py\n{traceback.format_exc()}\n```')
+
+    @commands.command()
+    @checks.has_guild_permissions(administrator=True)
+    async def unplonk(self, ctx, *, member: discord.Member):
+        """Unbans a user from the bot"""
+        await self.bot.db.remove_plonk(member.id)
+        await ctx.send('\N{OK HAND SIGN}')
+
+    @unplonk.error()
+    async def unplonk_error(self, ctx, error):
+        """unplonk error handler, mainly for database stuff cause that's what
+        will break
+        """
+        await ctx.send('\N{PISTOL}')
+        await ctx.send(f'```py\n{traceback.format_exc()}\n```')
 
     @commands.command()
     @checks.has_permissions(manage_messages=True)
