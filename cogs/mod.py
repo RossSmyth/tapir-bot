@@ -44,7 +44,7 @@ class Mod:
         To use these commands, you must have the Bot Admin role or have
         Manage Channels permissions. These commands are not allowed to be used
         in a private message context.
-        Users with Manage Roles or Bot Admin role can still invoke the bot
+        Users with Administrator or Bot Admin role can still invoke the bot
         in ignored channels.
         """
         if ctx.invoked_subcommand is None:
