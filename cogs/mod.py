@@ -107,7 +107,7 @@ class Mod:
     async def unignore(self, ctx, *, channel : discord.Channel = None):
         """Unignores a specific channel from being processed.
         If no channel is specified, it unignores the current channel.
-        To use this command you must have the Manage Channels permission or have the
+        To use this command you must have the Adminisrator permission or have the
         Bot Admin role.
         """
 
