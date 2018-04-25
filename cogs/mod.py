@@ -42,7 +42,7 @@ class Mod:
     async def ignore(self, ctx):
         """Handles the bot's ignore lists.
         To use these commands, you must have the Bot Admin role or have
-        Manage Channels permissions. These commands are not allowed to be used
+        Administrator permissions. These commands are not allowed to be used
         in a private message context.
         Users with Administrator or Bot Admin role can still invoke the bot
         in ignored channels.
