@@ -1,6 +1,7 @@
 from discord.ext import commands
 from .utils import config, checks
 from urllib.request import urlopen
+from datetime import datetime
 import json
 import discord
 import asyncio
@@ -15,26 +16,17 @@ class XKCD:
         day = 'day'
         month = 'month'
         year = 'year'
-        number = 'num'
-        title = 'title'
-        hidden = 'alt'
-        image = 'img'
         
-        template = '```Date: {} \nNumber: {} \nTitle: {} \nTooltip Text: {} \n```{}'
+        embed = discord.Embed(title="xkcd {}: {}".format(data['num'], data['title']), 
+                              colour=discord.Colour(0x96a8c8), 
+                              url="https://xkcd.com/{}/".format(data['num']), 
+                              timestamp=datetime(int(data['year']), int(data['month']), int(data['day'])))
+
+        embed.set_image(url="{}".format(data['img']))
+        embed.set_thumbnail(url="https://xkcd.com/s/0b7742.png")
+        embed.set_footer(text="{}".format(data['alt']))
         
-        day = data[day]
-        month = data[month]
-        year = data[year]
-        number = data[number]
-        title = data[title]
-        hidden = data[hidden]
-        image = data[image]
-        
-        date = '{}-{}-{}'.format(month, day, year)
-        
-        complete = template.format(date, number, title, hidden, image)
-        
-        return complete
+        return embed
         
     @commands.command()
     async def xkcd(self, number=None):
@@ -44,13 +36,13 @@ class XKCD:
             with urlopen('http://xkcd.com/info.0.json') as comic:
                 comic = comic.read().decode('utf8')
                 comic = json.loads(comic)
-                await self.bot.say(await self.formatter(comic))
+                await self.bot.say(embed=await self.formatter(comic))
         else:
             try:
                 with urlopen('http://xkcd.com/{}/info.0.json'.format(number)) as comic:
                     comic = comic.read().decode('utf8')
                     comic = json.loads(comic)
-                    await self.bot.say(await self.formatter(comic))
+                    await self.bot.say(embed=await self.formatter(comic))
             except:
                 await self.bot.say('Not a valid comic number')
                 
