@@ -17,10 +17,14 @@ class Tapir:
         """The wonderful tapir command that outputs a random tapir"""
         tapir_list = self.config.get('tapirs', [])
         tapir = tapir_list[random.randrange(len(tapir_list))]
+        
+        embed = discord.Embed(colour=discord.Colour(0xa07553))
+        embed.set_image(url="{}".format(tapir))
+        
         try:
-            await self.bot.say(tapir)
+            await self.bot.say(embed=embed)
         except:
-            await self.bot.whisper(tapir)
+            await self.bot.whisper(embed=embed)
 
     @commands.command(hidden=True)
     @checks.is_owner()
