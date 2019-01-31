@@ -11,7 +11,8 @@ class Tapir:
         self.bot = bot
         self.config = config.Config('tapirs.json', loop=bot.loop)
         
-    @commands.command(cooldown=5)
+    @commands.command()
+    @commands.cooldown(1, 10, commands.BucketType.channel)
     async def tapir(self):
         """The wonderful tapir command that outputs a random tapir"""
         tapir_list = self.config.get('tapirs', [])
