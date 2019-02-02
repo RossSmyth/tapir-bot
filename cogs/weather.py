@@ -42,7 +42,7 @@ class Weather:
         conditions = current_data["weather_condition_value_1d"]["value"]
         
         visibility = current_data["visibility_value_1"]["value"]
-        visibility = "{} mi ({} km)".format(visibility, visibility * 1.609)
+        visibility = "{:.2g} mi ({:.2g} km)".format(visibility, visibility * 1.609)
         
         obsevation_time = current_data["air_temp_value_1"]["date_time"]
         obsevation_time = datetime.strptime(obsevation_time, "%Y-%m-%dT%H:%M:%S%z")
