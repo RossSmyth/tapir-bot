@@ -30,8 +30,12 @@ class Weather:
         air_temp = current_data["air_temp_value_1"]["value"]
         air_temp = "{} F ({} C)".format(int(air_temp), int((air_temp - 32) * 5 / 9))
         
-        wind_chill = current_data["wind_chill_value_1d"]["value"]
-        wind_chill = "{} F ({} C)".format(int(wind_chill), int((wind_chill - 32) * 5 / 9))
+        try:
+            wind_chill = current_data["wind_chill_value_1d"]["value"]
+        except KeyError:
+            wind_chill = "not cold"
+        else:
+            wind_chill = "{} F ({} C)".format(int(wind_chill), int((wind_chill - 32) * 5 / 9))
         
         wind_speed = current_data["wind_speed_value_1"]["value"]
         wind_speed = "{} mph ({} km/h)".format(int(wind_speed), int(wind_speed * 1.609))
