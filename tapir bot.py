@@ -104,7 +104,6 @@ if __name__ == '__main__':
             bot.load_extension(extension)
         except Exception as e:
             print('Failed to load extension {}\n{}: {}'.format(extension, type(e).__name__, e))
-    print(f"{credentials['token']}")
     bot.run(credentials['token'])
     handlers = log.handlers[:]
     for hdlr in handlers:
