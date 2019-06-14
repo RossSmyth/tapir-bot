@@ -23,7 +23,8 @@ initial_extensions = [
     'cogs.xkcd',
     'cogs.repl',
     'cogs.misc',
-    'cogs.raffle'
+    'cogs.raffle',
+    'cogs.weather'
     ]
 
 discord_logger = logging.getLogger('discord')
@@ -103,7 +104,7 @@ if __name__ == '__main__':
             bot.load_extension(extension)
         except Exception as e:
             print('Failed to load extension {}\n{}: {}'.format(extension, type(e).__name__, e))
-
+    print(f"{credentials['token']}")
     bot.run(credentials['token'])
     handlers = log.handlers[:]
     for hdlr in handlers:
