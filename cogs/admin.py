@@ -4,51 +4,51 @@ import discord
 import inspect
 import asyncio
 
-class Admin:
+class Admin(commands.Cog):
     """Admin-only commands that make the bot dynamic."""
 
     def __init__(self, bot):
         self.bot = bot
-    
+
     @commands.command(hidden=True)
-    @checks.is_owner()
-    async def load(self, *, module : str):
+    @commands.check(commands.is_owner())
+    async def load(self, ctx, *, module : str):
         """Loads a module."""
         try:
             self.bot.load_extension(module)
         except Exception as e:
-            await self.bot.say('\N{PISTOL}')
-            await self.bot.say('{}: {}'.format(type(e).__name__, e))
+            await ctx.send('\N{PISTOL}')
+            await ctx.send('{}: {}'.format(type(e).__name__, e))
         else:
-            await self.bot.say('\N{OK HAND SIGN}')
-            
+            await ctx.send('\N{OK HAND SIGN}')
+
     @commands.command(hidden=True)
-    @checks.is_owner()
-    async def unload(self, *, module : str):
+    @commands.check(commands.is_owner())
+    async def unload(self, ctx, *, module : str):
         """Unloads a module."""
         try:
             self.bot.unload_extension(module)
         except Exception as e:
-            await self.bot.say('\N{PISTOL}')
-            await self.bot.say('{}: {}'.format(type(e).__name__, e))
+            await ctx.send('\N{PISTOL}')
+            await ctx.send('{}: {}'.format(type(e).__name__, e))
         else:
-            await self.bot.say('\N{OK HAND SIGN}')
-    
+            await ctx.send('\N{OK HAND SIGN}')
+
     @commands.command(name='reload', hidden=True)
-    @checks.is_owner()
-    async def _reload(self, *, module : str):
+    @commands.check(commands.is_owner())
+    async def _reload(self, ctx, *, module : str):
         """Reloads a module."""
         try:
             self.bot.unload_extension(module)
             self.bot.load_extension(module)
         except Exception as e:
-            await self.bot.say('\N{PISTOL}')
-            await self.bot.say('{}: {}'.format(type(e).__name__, e))
+            await ctx.send('\N{PISTOL}')
+            await ctx.send('{}: {}'.format(type(e).__name__, e))
         else:
-            await self.bot.say('\N{OK HAND SIGN}')
-            
-    @commands.command(pass_context=True, hidden=True, aliases=['execute'])
-    @checks.is_owner()
+            await ctx.send('\N{OK HAND SIGN}')
+
+    @commands.command(hidden=True, aliases=['execute'])
+    @commands.check(commands.is_owner())
     async def debug(self, ctx, *, code : str):
         """Evaluates code."""
         code = code.strip('` ')
@@ -59,7 +59,7 @@ class Admin:
             'bot': self.bot,
             'ctx': ctx,
             'message': ctx.message,
-            'server': ctx.message.server,
+            'server': ctx.message.guild,
             'channel': ctx.message.channel,
             'author': ctx.message.author
         }
@@ -71,10 +71,10 @@ class Admin:
             if inspect.isawaitable(result):
                 result = await result
         except Exception as e:
-            await self.bot.say(python.format(type(e).__name__ + ': ' + str(e)))
+            await ctx.send(python.format(type(e).__name__ + ': ' + str(e)))
             return
 
-        await self.bot.say(python.format(result))
-        
+        await ctx.send(python.format(result))
+
 def setup(bot):
     bot.add_cog(Admin(bot))

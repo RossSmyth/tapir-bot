@@ -8,6 +8,7 @@ import logging
 import traceback
 import sys
 from collections import Counter
+from utils.credentials import load_credentials
 
 description = """
 I am a bot written by treefroog to provide tapirs! \n \nThis is a list of cogs along with their associated commands:
@@ -31,7 +32,7 @@ discord_logger = logging.getLogger('discord')
 discord_logger.setLevel(logging.CRITICAL)
 log = logging.getLogger()
 log.setLevel(logging.INFO)
-handler = logging.FileHandler(filename='tapir-bot.log', encoding='utf-8', mode='r+')
+handler = logging.FileHandler(filename='tapir-bot.log', encoding='utf-8')
 log.addHandler(handler)
 
 help_attrs = dict(hidden=True, name='halp')
@@ -39,47 +40,47 @@ help_attrs = dict(hidden=True, name='halp')
 bot = commands.Bot(command_prefix=['!'], description=description, pm_help=None, help_attrs=help_attrs)
 
 @bot.event
-async def on_command_error(error, ctx):
+async def on_command_error(ctx, error):
     """some custom error stuff"""
     if isinstance(error, commands.NoPrivateMessage):
-        await bot.send_message(ctx.message.author, 'This command cannot be used in private messages.')
+        await ctx.message.author.send('This command cannot be used in private messages.')
     elif isinstance(error, commands.DisabledCommand):
-        await bot.send_message(ctx.message.author, 'Sorry. This command is disabled and cannot be used.')
+        await ctx.message.author.send('Sorry. This command is disabled and cannot be used.')
     elif isinstance(error, commands.CommandInvokeError):
         print('In {0.command.qualified_name}:'.format(ctx), file=sys.stderr)
         traceback.print_tb(error.original.__traceback__)
         print('{0.__class__.__name__}: {0}'.format(error.original), file=sys.stderr)
-        
-        
+
+
 @bot.event
 async def on_ready():
     """what happens when tapir-bot connects to the discord api"""
-    await bot.change_presence(game=discord.Game(name='Say !halp for help!'))
+    await bot.change_presence(status=discord.Status.idle, activity=discord.Game(name='Say !help for help!'))
     print('Logged in as:')
     print('Username: ' + bot.user.name)
-    print('ID: ' + bot.user.id)
+    print('ID: ' + str(bot.user.id))
     if not hasattr(bot, 'uptime'):
         bot.uptime = datetime.datetime.utcnow()
-        
+
 @bot.event
-async def on_command(command, ctx):
+async def on_command(ctx):
     """when a command happens it logs it"""
-    bot.commands_used[command.name] += 1
+    bot.commands_used[ctx.command.name] += 1
     message = ctx.message
     destination = None
-    if message.channel.is_private:
+    if isinstance(message.channel, discord.abc.PrivateChannel):
         destination = 'Private Message'
     else:
-        destination = '#{0.channel.name} ({0.server.name})'.format(message)
+        destination = '#{0.channel.name} ({0.guild.name})'.format(message)
 
-    log.info('{0.timestamp}: {0.author.name} in {1}: {0.content}'.format(message, destination))
+    log.info('{0.created_at}: {0.author.name} in {1}: {0.content}'.format(message, destination))
 
 @bot.event
 async def on_message(message):
     """Some message checking stuff"""
     if message.author.bot:
         return
-    
+
     #Lowers the command for insensitive case
     content_list = message.content.split(" ")
     content_list[0] = content_list[0].lower()
@@ -87,11 +88,6 @@ async def on_message(message):
 
     await bot.process_commands(message)
 
-def load_credentials():
-    """loads the credentials file with important stuff in it"""
-    with open('credentials.json') as f:
-        return json.load(f)
-        
 if __name__ == '__main__':
     if any('debug' in arg.lower() for arg in sys.argv):
         bot.command_prefix = '!'

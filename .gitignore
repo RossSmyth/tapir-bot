@@ -3,3 +3,4 @@ node_modules/*
 credentials.json
 *.pyc
 *.log
+venv

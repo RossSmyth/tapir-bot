@@ -1,6 +1,6 @@
 #formats messages
 
-async def entry_to_code(bot, entries):
+def entry_to_code(entries):
     """formats input into discord code format"""
     width = max(map(lambda t: len(t[0]), entries))
     output = ['```']
@@ -8,8 +8,9 @@ async def entry_to_code(bot, entries):
     for name, entry in entries:
         output.append(fmt.format(name, entry, width=width))
     output.append('```')
-    await bot.say('\n'.join(output))
-    
+
+    return '\n'.join(output)
+
 async def indented_entry_to_code(bot, entries):
     """formats input into discord code format with indents"""
     width = max(map(lambda t: len(t[0]), entries))
@@ -19,7 +20,7 @@ async def indented_entry_to_code(bot, entries):
         output.append(fmt.format(name, entry, width=width))
     output.append('```')
     await bot.say('\n'.join(output))
-    
+
 async def too_many_matches(bot, msg, matches, entry):
     """if what they did has more than one match give them three tries"""
     check = lambda m: m.content.isdigit()

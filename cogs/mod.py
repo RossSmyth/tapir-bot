@@ -5,7 +5,7 @@ import re
 import discord
 import asyncio
 
-class Mod:
+class Mod(commands.Cog):
     """Moderation related commands."""
 
     def __init__(self, bot):
@@ -13,8 +13,8 @@ class Mod:
         self.config = config.Config('mod.json', loop=bot.loop)
 
     def bot_user(self, message):
-        return message.server.me if message.channel.is_private else self.bot.user
-		
+        return message.guild.me if message.channel.is_private else self.bot.user
+
     def __check(self, ctx):
         msg = ctx.message
         if checks.is_owner_check(msg):
@@ -37,7 +37,7 @@ class Mod:
 
         return True
 
-    @commands.group(pass_context=True, no_pm=True)
+    @commands.group(no_pm=True)
     @checks.admin_or_permissions(administrator=True)
     async def ignore(self, ctx):
         """Handles the bot's ignore lists.
@@ -48,26 +48,26 @@ class Mod:
         in ignored channels.
         """
         if ctx.invoked_subcommand is None:
-            await self.bot.say('Invalid subcommand passed: {0.subcommand_passed}'.format(ctx))
-            
+            await ctx.send('Invalid subcommand passed: {0.subcommand_passed}'.format(ctx))
+
     @ignore.command(name='list', pass_context=True)
     async def ignore_list(self, ctx):
         """Tells you what channels are currently ignored in this server."""
 
         ignored = self.config.get('ignored', [])
-        channel_ids = set(c.id for c in ctx.message.server.channels)
+        channel_ids = set(c.id for c in ctx.message.guild.channels)
         result = []
         for channel in ignored:
             if channel in channel_ids:
                 result.append('<#{}>'.format(channel))
 
         if result:
-            await self.bot.say('The following channels are ignored:\n\n{}'.format(', '.join(result)))
+            await ctx.send('The following channels are ignored:\n\n{}'.format(', '.join(result)))
         else:
-            await self.bot.say('I am not ignoring any channels here.')
-            
+            await ctx.send('I am not ignoring any channels here.')
+
     @ignore.command(name='channel', pass_context=True)
-    async def channel_cmd(self, ctx, *, channel : discord.Channel = None):
+    async def channel_cmd(self, ctx, *, channel : discord.TextChannel = None):
         """Ignores a specific channel from being processed.
         If no channel is specified, the current channel is ignored.
         If a channel is ignored then the bot does not process commands in that
@@ -79,13 +79,13 @@ class Mod:
 
         ignored = self.config.get('ignored', [])
         if channel.id in ignored:
-            await self.bot.say('That channel is already ignored.')
+            await ctx.send('That channel is already ignored.')
             return
 
         ignored.append(channel.id)
         await self.config.put('ignored', ignored)
-        await self.bot.say('\U0001f44c')
-        
+        await ctx.send('\U0001f44c')
+
     @ignore.command(name='all', pass_context=True)
     async def _all(self, ctx):
         """Ignores every channel in the server from being processed.
@@ -97,14 +97,14 @@ class Mod:
         """
 
         ignored = self.config.get('ignored', [])
-        channels = ctx.message.server.channels
+        channels = ctx.message.guild.channels
         ignored.extend(c.id for c in channels if c.type == discord.ChannelType.text)
         await self.config.put('ignored', list(set(ignored))) # make unique
-        await self.bot.say('\U0001f44c')
-        
-    @commands.command(pass_context=True, no_pm=True)
+        await ctx.send('\U0001f44c')
+
+    @commands.command(no_pm=True)
     @checks.admin_or_permissions(administrator=True)
-    async def unignore(self, ctx, *, channel : discord.Channel = None):
+    async def unignore(self, ctx, *, channel : discord.TextChannel = None):
         """Unignores a specific channel from being processed.
         If no channel is specified, it unignores the current channel.
         To use this command you must have the Adminisrator permission or have the
@@ -120,13 +120,13 @@ class Mod:
         try:
             ignored.remove(channel.id)
         except ValueError:
-            await self.bot.say('Channel was not ignored in the first place.')
+            await ctx.send('Channel was not ignored in the first place.')
         else:
-            await self.bot.say('\U0001f44c')
-            
+            await ctx.send('\U0001f44c')
+
     @commands.command(no_pm=True)
     @checks.admin_or_permissions(administrator=True)
-    async def plonk(self, *, member : discord.Member):
+    async def plonk(self, ctx, *, member : discord.Member):
         """Bans a user from using the bot.
         Note that this ban is **global**. So they are banned from
         all servers that they access the bot with. So use this with
@@ -140,13 +140,13 @@ class Mod:
 
         plonks = self.config.get('plonks', [])
         if member.id in plonks:
-            await self.bot.say('That user is already bot banned.')
+            await ctx.send('That user is already bot banned.')
             return
 
         plonks.append(member.id)
         await self.config.put('plonks', plonks)
-        await self.bot.say('{0.name} has been banned from using the bot.'.format(member))
-        
+        await ctx.send('{0.name} has been banned from using the bot.'.format(member))
+
     @commands.command(no_pm=True)
     @checks.admin_or_permissions(administrator=True)
     async def unplonk(self, *, member : discord.Member):
@@ -163,9 +163,9 @@ class Mod:
             pass
         else:
             await self.config.put('plonks', plonks)
-            await self.bot.say('{0.name} has been unbanned from using the bot.'.format(member))
+            await ctx.send('{0.name} has been unbanned from using the bot.'.format(member))
 
-    @commands.command(pass_context=True, no_pm=True)
+    @commands.command(no_pm=True)
     @checks.mod_or_permissions(manage_messages=True)
     async def cleanup(self, ctx, search : int = 100):
         """Cleans up the bot's messages from the channel.
@@ -189,22 +189,22 @@ class Mod:
             valid_call = any(entry.content.startswith(prefix) for prefix in prefixes)
             return valid_call and not entry.content[1:2].isspace()
 
-        can_delete = channel.permissions_for(channel.server.me).manage_messages
+        can_delete = channel.permissions_for(channel.guild.me).manage_messages
 
         if not can_delete:
             api_calls = 0
-            async for entry in self.bot.logs_from(channel, limit=search, before=ctx.message):
+            async for entry in channel.history(limit=search, before=ctx.message):
                 if api_calls and api_calls % 5 == 0:
                     await asyncio.sleep(1.1)
 
                 if entry.author == self.bot.user:
-                    await self.bot.delete_message(entry)
+                    await entry.delete()
                     spammers['Bot'] += 1
                     api_calls += 1
 
                 if is_possible_command_invoke(entry):
                     try:
-                        await self.bot.delete_message(entry)
+                        await entry.delete()
                     except discord.Forbidden:
                         continue
                     else:
@@ -212,7 +212,7 @@ class Mod:
                         api_calls += 1
         else:
             predicate = lambda m: m.author == self.bot.user or is_possible_command_invoke(m)
-            deleted = await self.bot.purge_from(channel, limit=search, before=ctx.message, check=predicate)
+            deleted = await channel.purge(limit=search, before=ctx.message, check=predicate)
             spammers = Counter(m.author.display_name for m in deleted)
 
         deleted = sum(spammers.values())
@@ -222,11 +222,11 @@ class Mod:
             spammers = sorted(spammers.items(), key=lambda t: t[1], reverse=True)
             messages.extend(map(lambda t: '- **{0[0]}**: {0[1]}'.format(t), spammers))
 
-        await self.bot.say('\n'.join(messages), delete_after=10)
+        await ctx.send('\n'.join(messages), delete_after=10)
 
     @commands.command(no_pm=True)
     @checks.admin_or_permissions(kick_members=True)
-    async def kick(self, *, member : discord.Member):
+    async def kick(self, ctx, *, member : discord.Member):
         """Kicks a member from the server.
         In order for this to work, the bot must have Kick Member permissions.
         To use this command you must have Kick Members permission or have the
@@ -234,17 +234,17 @@ class Mod:
         """
 
         try:
-            await self.bot.kick(member)
+            await member.kick()
         except discord.Forbidden:
-            await self.bot.say('The bot does not have permissions to kick members.')
+            await ctx.send('The bot does not have permissions to kick members.')
         except discord.HTTPException:
-            await self.bot.say('Kicking failed.')
+            await ctx.send('Kicking failed.')
         else:
-            await self.bot.say('\U0001f44c')
+            await ctx.send('\U0001f44c')
 
     @commands.command(no_pm=True)
     @checks.admin_or_permissions(ban_members=True)
-    async def ban(self, *, member : discord.Member):
+    async def ban(self, ctx, *, member : discord.Member):
         """Bans a member from the server.
         In order for this to work, the bot must have Ban Member permissions.
         To use this command you must have Ban Members permission or have the
@@ -252,18 +252,18 @@ class Mod:
         """
 
         try:
-            await self.bot.ban(member)
+            await member.ban()
         except discord.Forbidden:
-            await self.bot.say('The bot does not have permissions to ban members.')
+            await ctx.send('The bot does not have permissions to ban members.')
         except discord.HTTPException:
-            await self.bot.say('Banning failed.')
+            await ctx.send('Banning failed.')
         else:
-            await self.bot.say('\U0001f44c')
+            await ctx.send('\U0001f44c')
 
 
     @commands.command(no_pm=True)
     @checks.admin_or_permissions(ban_members=True)
-    async def softban(self, *, member : discord.Member):
+    async def softban(self, ctx, *, member : discord.Member):
         """Soft bans a member from the server.
         A softban is basically banning the member from the server but
         then unbanning the member as well. This allows you to essentially
@@ -273,16 +273,16 @@ class Mod:
         """
 
         try:
-            await self.bot.ban(member)
-            await self.bot.unban(member.server, member)
+            await member.ban()
+            await member.unban()
         except discord.Forbidden:
-            await self.bot.say('The bot does not have permissions to ban members.')
+            await ctx.send('The bot does not have permissions to ban members.')
         except discord.HTTPException:
-            await self.bot.say('Banning failed.')
+            await ctx.send('Banning failed.')
         else:
-            await self.bot.say('\U0001f44c')
+            await ctx.send('\U0001f44c')
 
-    @commands.command(pass_context=True, no_pm=True)
+    @commands.command(no_pm=True)
     @checks.admin_or_permissions(manage_roles=True)
     async def colour(self, ctx, colour : discord.Colour, *, role : discord.Role):
         """Changes the colour of a role.
@@ -293,13 +293,14 @@ class Mod:
         This command cannot be used in a private message.
         """
         try:
-            await self.bot.edit_role(ctx.message.server, role, colour=colour)
+            await role.edit(colour=colour)
+            # await self.bot.edit_role(ctx.message.guild, role, colour=colour)
         except discord.Forbidden:
-            await self.bot.say('The bot must have Manage Roles permissions to use this.')
+            await ctx.send('The bot must have Manage Roles permissions to use this.')
         else:
-            await self.bot.say('\U0001f44c')
+            await ctx.send('\U0001f44c')
 
-    @commands.group(pass_context=True, no_pm=True, aliases=['purge'])
+    @commands.group(no_pm=True, aliases=['purge'])
     @checks.admin_or_permissions(manage_messages=True)
     async def remove(self, ctx):
         """Removes messages that meet a criteria.
@@ -311,10 +312,10 @@ class Mod:
         """
 
         if ctx.invoked_subcommand is None:
-            await self.bot.say('Invalid criteria passed "{0.subcommand_passed}"'.format(ctx))
+            await ctx.send('Invalid criteria passed "{0.subcommand_passed}"'.format(ctx))
 
-    async def do_removal(self, message, limit, predicate):
-        deleted = await self.bot.purge_from(message.channel, limit=limit, before=message, check=predicate)
+    async def do_removal(self, ctx, message, limit, predicate):
+        deleted = await message.channel.purge(limit=limit, before=message, check=predicate)
         spammers = Counter(m.author.display_name for m in deleted)
         messages = ['{} messages(s) were removed.'.format(len(deleted))]
         if len(deleted):
@@ -322,32 +323,32 @@ class Mod:
             spammers = sorted(spammers.items(), key=lambda t: t[1], reverse=True)
             messages.extend(map(lambda t: '**{0[0]}**: {0[1]}'.format(t), spammers))
 
-        await self.bot.say('\n'.join(messages), delete_after=10)
+        await ctx.send('\n'.join(messages), delete_after=10)
 
     @remove.command(pass_context=True)
     async def embeds(self, ctx, search=100):
         """Removes messages that have embeds in them."""
-        await self.do_removal(ctx.message, search, lambda e: len(e.embeds))
+        await self.do_removal(ctx, ctx.message, search, lambda e: len(e.embeds))
 
     @remove.command(pass_context=True)
     async def files(self, ctx, search=100):
         """Removes messages that have attachments in them."""
-        await self.do_removal(ctx.message, search, lambda e: len(e.attachments))
+        await self.do_removal(ctx, ctx.message, search, lambda e: len(e.attachments))
 
     @remove.command(pass_context=True)
     async def images(self, ctx, search=100):
         """Removes messages that have embeds or attachments."""
-        await self.do_removal(ctx.message, search, lambda e: len(e.embeds) or len(e.attachments))
+        await self.do_removal(ctx, ctx.message, search, lambda e: len(e.embeds) or len(e.attachments))
 
     @remove.command(name='all', pass_context=True)
     async def _remove_all(self, ctx, search=100):
         """Removes all messages."""
-        await self.do_removal(ctx.message, search, lambda e: True)
+        await self.do_removal(ctx, ctx.message, search, lambda e: True)
 
     @remove.command(pass_context=True)
     async def user(self, ctx, member : discord.Member, search=100):
         """Removes all messages by the member."""
-        await self.do_removal(ctx.message, search, lambda e: e.author == member)
+        await self.do_removal(ctx, ctx.message, search, lambda e: e.author == member)
 
     @remove.command(pass_context=True)
     async def contains(self, ctx, *, substr : str):
@@ -355,10 +356,10 @@ class Mod:
         The substring must be at least 3 characters long.
         """
         if len(substr) < 3:
-            await self.bot.say('The substring length must be at least 3 characters.')
+            await ctx.send('The substring length must be at least 3 characters.')
             return
 
-        await self.do_removal(ctx.message, 100, lambda e: substr in e.content)
+        await self.do_removal(ctx, ctx.message, 100, lambda e: substr in e.content)
 
     @remove.command(name='bot', pass_context=True)
     async def _bot(self, ctx, prefix, *, member: discord.Member):
@@ -368,7 +369,7 @@ class Mod:
 
         def predicate(m):
             return m.author == member or m.content.startswith(prefix)
-        await self.do_removal(ctx.message, 100, predicate)
+        await self.do_removal(ctx, ctx.message, 100, predicate)
 
     @remove.command(pass_context=True)
     async def custom(self, ctx, *, args: str):
@@ -409,7 +410,7 @@ class Mod:
         try:
             args = parser.parse_args(shlex.split(args))
         except Exception as e:
-            await self.bot.say(str(e))
+            await ctx.send(str(e))
             return
 
         predicates = []
@@ -433,7 +434,7 @@ class Mod:
                     converter = commands.MemberConverter(ctx, u)
                     users.append(converter.convert())
                 except Exception as e:
-                    await self.bot.say(str(e))
+                    await ctx.send(str(e))
                     return
 
             predicates.append(lambda m: m.author in users)
@@ -455,7 +456,7 @@ class Mod:
             return r
 
         args.search = max(0, min(2000, args.search)) # clamp from 0-2000
-        await self.do_removal(ctx.message, args.search, predicate)
+        await self.do_removal(ctx, ctx.message, args.search, predicate)
 
 def setup(bot):
     bot.add_cog(Mod(bot))

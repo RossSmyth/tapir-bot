@@ -4,36 +4,33 @@ import random
 import discord
 import asyncio
 
-class Tapir:
+class Tapir(commands.Cog):
     """the tapir command(s)"""
-    
+
     def __init__(self, bot):
         self.bot = bot
         self.config = config.Config('tapirs.json', loop=bot.loop)
-        
+
     @commands.command()
     @commands.cooldown(1, 10, commands.BucketType.channel)
-    async def tapir(self):
+    async def tapir(self, ctx):
         """The wonderful tapir command that outputs a random tapir"""
         tapir_list = self.config.get('tapirs', [])
         tapir = tapir_list[random.randrange(len(tapir_list))]
-        
+
         embed = discord.Embed(colour=discord.Colour(0xa07553))
         embed.set_image(url="{}".format(tapir))
-        
-        try:
-            await self.bot.say(embed=embed)
-        except:
-            await self.bot.whisper(embed=embed)
+
+        await ctx.send(embed=embed)
 
     @commands.command(hidden=True)
-    @checks.is_owner()
-    async def save_tapir(self, *, tapir_link):
+    @commands.check(commands.is_owner())
+    async def save_tapir(self, ctx, *, tapir_link):
         """allows the saving of a tapirs"""
         tapir_list = self.config.get('tapirs', [])
         tapir_list.append(tapir_link)
         await self.config.put('tapirs', tapir_list)
-        await self.bot.say('\N{OK HAND SIGN}')
-        
+        await ctx.send('\N{OK HAND SIGN}')
+
 def setup(bot):
     bot.add_cog(Tapir(bot))
